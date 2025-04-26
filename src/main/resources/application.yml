@@ -3,3 +3,16 @@ server:
 spring:
   application:
     name: dockins
+  datasource:
+    url: ${DOCKINS_DB_URL:jdbc:postgresql://localhost:5432/postgres}
+    username: ${DOCKINS_DB_USERNAME:postgres}
+    password: ${DOCKINS_DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+
+app:
+  secret:
+    database-encryption-key: ${DOCKINS_DB_ENCRYPTION_KEY:postgrespostgres}
