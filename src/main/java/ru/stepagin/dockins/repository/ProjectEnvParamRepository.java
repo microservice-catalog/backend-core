@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import ru.stepagin.dockins.entity.ProjectEnvParamEntity;
 
 @Repository
-interface ProjectEnvParamRepository extends JpaRepository<ProjectEnvParamEntity, Long> {
+public interface ProjectEnvParamRepository extends JpaRepository<ProjectEnvParamEntity, Long> {
 
 }

@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import ru.stepagin.dockins.entity.TagEntity;
 
 @Repository
-interface TagRepository extends JpaRepository<TagEntity, Long> {
+public interface TagRepository extends JpaRepository<TagEntity, Long> {
 
 }

@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "tag", indexes = {
-        @Index(columnList = "name")
+        @Index(columnList = "name", name = "idx_tag_name")
 })
 public class TagEntity {
     @Id

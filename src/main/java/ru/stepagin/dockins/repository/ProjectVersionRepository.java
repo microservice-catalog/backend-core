@@ -7,6 +7,6 @@ import ru.stepagin.dockins.entity.ProjectVersionEntity;
 import java.util.UUID;
 
 @Repository
-interface ProjectVersionRepository extends JpaRepository<ProjectVersionEntity, UUID> {
+public interface ProjectVersionRepository extends JpaRepository<ProjectVersionEntity, UUID> {
 
 }

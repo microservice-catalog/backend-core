@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
                 @UniqueConstraint(columnNames = {"project_version_id", "name"})
         },
         indexes = {
-                @Index(columnList = "projectVersion")
+                @Index(columnList = "projectVersionId", name = "idx_project_env_param_project_version_id")
         }
 )
 public class ProjectEnvParamEntity {

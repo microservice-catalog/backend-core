@@ -1,8 +1,9 @@
-package ru.stepagin.dockins.entity;
+package ru.stepagin.dockins.domain.auth.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
+import ru.stepagin.dockins.entity.ProjectInfoEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,8 +16,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "account", indexes = {
-        @Index(columnList = "username"),
-        @Index(columnList = "email")
+        @Index(columnList = "username", name = "idx_account_username"),
+        @Index(columnList = "email", name = "idx_account_email")
 })
 public class AccountEntity {
     @Id
@@ -29,6 +30,10 @@ public class AccountEntity {
 
     @Column(nullable = false, unique = true)
     private String email;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean emailConfirmed = false; // подтверждён ли email
 
     @Column(nullable = false)
     private String password;

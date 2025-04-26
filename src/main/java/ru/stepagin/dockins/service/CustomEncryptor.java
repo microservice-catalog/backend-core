@@ -17,7 +17,7 @@ public class CustomEncryptor implements AttributeConverter<String, String> {
     private final SecretStorageService secretStorageService;
 
     private SecretKeySpec getKey() {
-        byte[] keyBytes = secretStorageService.getEncryptionKey();
+        byte[] keyBytes = secretStorageService.getDbEncryptionKey();
         return new SecretKeySpec(keyBytes, 0, 16, "AES");
     }
 

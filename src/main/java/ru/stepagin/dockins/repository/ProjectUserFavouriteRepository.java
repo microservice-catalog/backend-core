@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import ru.stepagin.dockins.entity.ProjectUserFavouriteEntity;
 
 @Repository
-interface ProjectUserFavouriteRepository extends JpaRepository<ProjectUserFavouriteEntity, Long> {
+public interface ProjectUserFavouriteRepository extends JpaRepository<ProjectUserFavouriteEntity, Long> {
 
 }

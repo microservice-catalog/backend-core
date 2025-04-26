@@ -1,6 +1,8 @@
 server:
   port: ${SERVER_PORT:8080}
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: dockins
   datasource:
@@ -9,10 +11,25 @@ spring:
     password: ${DOCKINS_DB_PASSWORD:postgres}
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
   jackson:
     property-naming-strategy: SNAKE_CASE
+  mail:
+    host: ${DOCKINS_MAIL_HOST}
+    port: ${DOCKINS_MAIL_PORT}
+    username: ${DOCKINS_MAIL_USERNAME}
+    password: ${DOCKINS_MAIL_PASSWORD}
+    properties:
+
+      mail:
+        smtp:
+          auth: true
+        starttls:
+          enable: true
+          required: true
 
 app:
   secret:
     database-encryption-key: ${DOCKINS_DB_ENCRYPTION_KEY:postgrespostgres}
+    jwt:
+      signature-key: ${DOCKINS_JWT_SIGNATURE_KEY:jwtjwtjwtjwtjwtjwtjwtjwtjwtjwtjwtjwtjwtjwtjwtjwt}

@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import ru.stepagin.dockins.entity.ProjectUserPullEntity;
 
 @Repository
-interface ProjectUserPullRepository extends JpaRepository<ProjectUserPullEntity, Long> {
+public interface ProjectUserPullRepository extends JpaRepository<ProjectUserPullEntity, Long> {
 
 }

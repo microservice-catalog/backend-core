@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import ru.stepagin.dockins.entity.ProjectTagEntity;
 
 @Repository
-interface ProjectTagRepository extends JpaRepository<ProjectTagEntity, Long> {
+public interface ProjectTagRepository extends JpaRepository<ProjectTagEntity, Long> {
 
 }

@@ -3,6 +3,7 @@ package ru.stepagin.dockins.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
+import ru.stepagin.dockins.domain.auth.entity.AccountEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,8 +17,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @Table(name = "project_info",
         indexes = {
-                @Index(columnList = "projectName"),
-                @Index(columnList = "authorAccountId")
+                @Index(columnList = "projectName", name = "idx_project_info_project_name"),
+                @Index(columnList = "authorAccountId", name = "idx_project_info_author_account_id")
         },
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = {"author_account_id", "project_name"})
