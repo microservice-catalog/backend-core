@@ -3,8 +3,8 @@ package ru.stepagin.dockins.domain.auth.exception;
 import lombok.Getter;
 import org.springframework.security.authentication.BadCredentialsException;
 
+@Getter
 public class AuthDomainException extends BadCredentialsException {
-    @Getter
     private final int errorCode;
 
     public AuthDomainException(String message, int errorCode, Throwable cause) {
@@ -17,8 +17,4 @@ public class AuthDomainException extends BadCredentialsException {
         this.errorCode = errorCode;
     }
 
-    public AuthDomainException(int errorCode) {
-        super();
-        this.errorCode = errorCode;
-    }
 }

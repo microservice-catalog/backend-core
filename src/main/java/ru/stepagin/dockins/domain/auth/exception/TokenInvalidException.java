@@ -11,8 +11,4 @@ public class TokenInvalidException extends AuthDomainException {
         super(message, DomainErrorCodes.TOKEN_INVALID);
     }
 
-    public TokenInvalidException() {
-        super(DomainErrorCodes.TOKEN_INVALID);
-    }
-
 }

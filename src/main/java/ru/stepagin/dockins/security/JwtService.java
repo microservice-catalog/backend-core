@@ -4,13 +4,15 @@ import io.jsonwebtoken.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.stepagin.dockins.api.v1.auth.dto.LoginRequestDto;
 import ru.stepagin.dockins.api.v1.auth.dto.RegisterRequestDto;
 import ru.stepagin.dockins.domain.auth.exception.AccountNotConfirmedException;
-import ru.stepagin.dockins.domain.auth.exception.InvalidCredentialsException;
+import ru.stepagin.dockins.domain.auth.exception.BadUsernameOrPasswordException;
 import ru.stepagin.dockins.domain.auth.exception.TokenExpiredException;
 import ru.stepagin.dockins.domain.auth.exception.TokenInvalidException;
 import ru.stepagin.dockins.domain.user.entity.AccountEntity;
@@ -31,23 +33,23 @@ public class JwtService {
     private final CookieService cookieService;
     private final JwtParser jwtParser;
 
-    public void registerNewAccount(RegisterRequestDto registerRequestDto) {
-
+    @Transactional
+    public AccountEntity registerNewAccount(@Valid RegisterRequestDto registerRequestDto) {
         AccountEntity account = AccountEntity.builder()
                 .username(registerRequestDto.getUsername())
                 .email(registerRequestDto.getEmail())
                 .password(passwordEncoder.encode(registerRequestDto.getPassword()))
                 .emailConfirmed(false)
                 .build();
-        accountRepository.save(account);
+        return accountRepository.save(account);
     }
 
     public void login(LoginRequestDto loginRequestDto, HttpServletResponse response) {
-        AccountEntity account = accountRepository.findByUsername(loginRequestDto.getUsername())
-                .orElseThrow(() -> new InvalidCredentialsException("Неверные имя пользователя или пароль"));
+        AccountEntity account = accountRepository.findByUsernameIgnoreCase(loginRequestDto.getUsername())
+                .orElseThrow(BadUsernameOrPasswordException::new);
 
         if (!passwordEncoder.matches(loginRequestDto.getPassword(), account.getPassword())) {
-            throw new InvalidCredentialsException("Неверные имя пользователя или пароль");
+            throw new BadUsernameOrPasswordException();
         }
 
         if (!account.getEmailConfirmed()) {
@@ -62,7 +64,7 @@ public class JwtService {
 
     public void refreshTokens(HttpServletResponse response) {
         HttpServletRequest request = RequestContextHolderUtil.getRequest();
-        String refreshToken = getCookieValue(request, "refresh_token")
+        String refreshToken = getCookieValue(request, "dockins_refresh_token")
                 .orElseThrow(() -> new TokenInvalidException("Отсутствует refresh_token"));
 
         try {

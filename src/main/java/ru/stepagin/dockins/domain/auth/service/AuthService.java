@@ -3,7 +3,9 @@ package ru.stepagin.dockins.domain.auth.service;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import ru.stepagin.dockins.api.v1.auth.dto.ConfirmEmailDto;
 import ru.stepagin.dockins.api.v1.auth.dto.LoginRequestDto;
@@ -17,6 +19,7 @@ import ru.stepagin.dockins.domain.external.mail.EmailConfirmationService;
 import ru.stepagin.dockins.domain.user.repository.AccountRepository;
 import ru.stepagin.dockins.security.JwtService;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Validated
@@ -27,9 +30,11 @@ public class AuthService {
     private final JwtService jwtService;
     private final EmailConfirmationService emailConfirmationService;
 
+    @Transactional
     public void register(@Valid RegisterRequestDto requestDto) {
         validateRegistrationData(requestDto);
-        jwtService.registerNewAccount(requestDto);
+        var account = jwtService.registerNewAccount(requestDto);
+        emailConfirmationService.sendConfirmationEmail(account);
     }
 
     public void confirmEmail(@Valid ConfirmEmailDto confirmEmailDto) {
@@ -50,8 +55,8 @@ public class AuthService {
 
 
     private void validateRegistrationData(RegisterRequestDto requestDto) {
-        validateUsername(requestDto.getUsername());
         validateEmail(requestDto.getEmail());
+        validateUsername(requestDto.getUsername());
         if (!dadataValidationService.validateEmail(requestDto.getEmail())) {
             throw new BadRegistrationDataException("Fake email.", DomainErrorCodes.FAKE_EMAIL);
         }
@@ -65,13 +70,16 @@ public class AuthService {
         if (username.length() < 5) {
             throw new BadRegistrationDataException("Имя пользователя должно быть от 5 до 30 символов.", DomainErrorCodes.USERNAME_IS_TOO_SHORT);
         }
-        if (accountRepository.findByUsername(username).isPresent()) {
+        if (accountRepository.findByUsernameIgnoreCase(username).isPresent()) {
             throw new UsernameAlreadyExistsException();
         }
         if (!username.matches("^[a-zA-Z].*$")) {
             throw new BadRegistrationDataException("Имя пользователя должно начинаться с латинской буквы.", DomainErrorCodes.USERNAME_STARTS_WITH_BAD_SYMBOL);
         }
-        if (!username.matches("^[a-zA-Z][a-zA-Z0-9-]*$")) {
+        if (!username.matches("^.*[a-zA-Z0-9]$")) {
+            throw new BadRegistrationDataException("Имя пользователя должно заканчиваться на латинскую букву или цифру.", DomainErrorCodes.USERNAME_ENDS_WITH_BAD_SYMBOL);
+        }
+        if (!username.matches("^[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9]$")) {
             throw new BadRegistrationDataException("Имя пользователя может содержать только латинские буквы, цифры и знак дефис.", DomainErrorCodes.USERNAME_CONTAINS_BAD_SYMBOL);
         }
     }

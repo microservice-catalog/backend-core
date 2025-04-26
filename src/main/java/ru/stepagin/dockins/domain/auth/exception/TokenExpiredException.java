@@ -11,8 +11,4 @@ public class TokenExpiredException extends AuthDomainException {
         super(message, DomainErrorCodes.TOKEN_EXPIRED);
     }
 
-    public TokenExpiredException() {
-        super(DomainErrorCodes.TOKEN_EXPIRED);
-    }
-
 }

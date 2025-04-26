@@ -17,17 +17,22 @@ public class AuthExceptionHandler {
             ActionNotAllowedException.class,
             AccountNotConfirmedException.class
     })
-    public ResponseEntity<CustomErrorResponse> handleInvalidCredentials(InvalidCredentialsException ex, HttpServletRequest request) {
+    public ResponseEntity<CustomErrorResponse> handleInvalidCredentials(AuthDomainException ex, HttpServletRequest request) {
         return buildErrorResponse(HttpStatus.FORBIDDEN, ex.getMessage(), ex.getErrorCode(), request, ex);
     }
 
     @ExceptionHandler(BadRegistrationDataException.class)
-    public ResponseEntity<CustomErrorResponse> handleAccountNotConfirmed(AccountNotConfirmedException ex, HttpServletRequest request) {
+    public ResponseEntity<CustomErrorResponse> handleAccountNotConfirmed(BadRegistrationDataException ex, HttpServletRequest request) {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), ex.getErrorCode(), request, ex);
     }
 
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<CustomErrorResponse> handleConstraintViolation(InvalidCredentialsException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage(), ex.getErrorCode(), request, ex);
+    }
+
     @ExceptionHandler(AuthDomainException.class)
-    public ResponseEntity<CustomErrorResponse> handleTokenExpired(TokenExpiredException ex, HttpServletRequest request) {
+    public ResponseEntity<CustomErrorResponse> handleTokenExpired(AuthDomainException ex, HttpServletRequest request) {
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage(), ex.getErrorCode(), request, ex);
     }
 

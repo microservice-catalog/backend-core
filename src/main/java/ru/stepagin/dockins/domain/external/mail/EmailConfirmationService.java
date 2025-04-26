@@ -1,15 +1,20 @@
 package ru.stepagin.dockins.domain.external.mail;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.stepagin.dockins.domain.auth.entity.EmailConfirmationEntity;
 import ru.stepagin.dockins.domain.auth.repository.EmailConfirmationRepository;
 import ru.stepagin.dockins.domain.user.entity.AccountEntity;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Random;
+import java.util.Scanner;
 
 @Service
 @RequiredArgsConstructor
@@ -17,8 +22,20 @@ public class EmailConfirmationService {
 
     private static final int EXPIRATION_MINUTES = 15;
     private final EmailConfirmationRepository emailConfirmationRepository;
-    private final JavaMailSender mailSender;
+    private final EmailService emailService;
+    private String confirmationTemplate;
 
+    @PostConstruct
+    public void init() throws IOException {
+        InputStream inputStream = getClass().getClassLoader()
+                .getResourceAsStream("templates/confirmation_template.html");
+        if (inputStream == null) {
+            throw new IOException("Шаблон confirmation_template не найден");
+        }
+        confirmationTemplate = new Scanner(inputStream, StandardCharsets.UTF_8).useDelimiter("\\A").next();
+    }
+
+    @Transactional
     public void sendConfirmationEmail(AccountEntity account) {
         String code = generateConfirmationCode();
 
@@ -35,6 +52,7 @@ public class EmailConfirmationService {
         sendEmail(account.getEmail(), code);
     }
 
+    @Transactional
     public void confirmEmail(String email, String code) {
         EmailConfirmationEntity confirmation = emailConfirmationRepository.findTopByAccountEmailOrderByCreatedOnDesc(email)
                 .orElseThrow(() -> new IllegalArgumentException("Код подтверждения не найден"));
@@ -54,15 +72,17 @@ public class EmailConfirmationService {
 
         AccountEntity account = confirmation.getAccount();
         account.setEmailConfirmed(true);
-        // Можно через отдельный AccountRepository.save(account), но предполагаем, что каскадно или через сервис сохранится
+        // account сохранится благодаря транзакции
     }
 
     private void sendEmail(String to, String code) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject("Код подтверждения регистрации");
-        message.setText("Ваш код подтверждения: " + code);
-        mailSender.send(message);
+        String body = confirmationTemplate.replace("{{code}}", code);
+        String subject = "Код подтверждения регистрации";
+        try {
+            emailService.sendEmail(to, subject, body);
+        } catch (MailException e) {
+            throw new EmailSendingException(e.getMessage());
+        }
     }
 
     private String generateConfirmationCode() {

@@ -44,7 +44,7 @@ public class TokenGenerator {
 
     public JwtParser getParser() {
         return Jwts.parser()
-                .decryptWith(key)
+                .verifyWith(key)
                 .build();
     }
 

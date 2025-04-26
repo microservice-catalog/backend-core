@@ -8,13 +8,13 @@ import org.springframework.stereotype.Component;
 public class CookieService {
 
     public void setAuthCookies(String accessToken, String refreshToken, HttpServletResponse response) {
-        response.addCookie(createCookie("access_token", accessToken, 15 * 60));
-        response.addCookie(createCookie("refresh_token", refreshToken, 7 * 24 * 60 * 60));
+        response.addCookie(createCookie("dockins_access_token", accessToken, 15 * 60));
+        response.addCookie(createCookie("dockins_refresh_token", refreshToken, 7 * 24 * 60 * 60));
     }
 
     public void clearAuthCookies(HttpServletResponse response) {
-        response.addCookie(deleteCookie("access_token"));
-        response.addCookie(deleteCookie("refresh_token"));
+        response.addCookie(deleteCookie("dockins_access_token"));
+        response.addCookie(deleteCookie("dockins_refresh_token"));
     }
 
     private Cookie createCookie(String name, String value, int maxAge) {

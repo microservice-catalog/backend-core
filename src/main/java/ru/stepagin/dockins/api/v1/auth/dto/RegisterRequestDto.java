@@ -6,14 +6,16 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class RegisterRequestDto {
 
     @NotBlank
     @Size(min = 5, max = 30)
-    @Pattern(regexp = "[a-zA-Z][a-zA-Z0-9-]*")
+    @Pattern(regexp = "[a-zA-Z0-9-]*")
     private String username;
 
     @NotBlank

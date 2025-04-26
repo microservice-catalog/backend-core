@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Код подтверждения</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            font-size: 24px;
+            color: #333333;
+            margin-bottom: 20px;
+        }
+
+        .code {
+            font-size: 32px;
+            font-weight: bold;
+            color: #007bff;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .footer {
+            font-size: 14px;
+            color: #777777;
+            text-align: center;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        Добро пожаловать в Dockins!
+    </div>
+    <div class="body">
+        <p>Ваш код подтверждения для регистрации на платформе:</p>
+        <div class="code">{{code}}</div>
+    </div>
+    <div class="footer">
+        Этот код действителен в течение 15 минут. Если вы не запрашивали код, просто проигнорируйте это письмо.
+    </div>
+</div>
+</body>
+</html>

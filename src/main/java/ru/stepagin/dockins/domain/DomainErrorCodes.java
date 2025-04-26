@@ -13,10 +13,11 @@ public class DomainErrorCodes {
     public static final int EMAIL_ALREADY_EXISTS = 4104; // Email уже зарегистрирован
     public static final int PASSWORD_TOO_WEAK = 4105; // Слабый пароль
     public static final int USERNAME_STARTS_WITH_BAD_SYMBOL = 4106;
-    public static final int USERNAME_CONTAINS_BAD_SYMBOL = 4107;
-    public static final int BAD_EMAIL = 4108;
-    public static final int FAKE_EMAIL = 4109;
-    public static final int PASSWORD_IS_TOO_LONG = 4110;
+    public static final int USERNAME_ENDS_WITH_BAD_SYMBOL = 4107;
+    public static final int USERNAME_CONTAINS_BAD_SYMBOL = 4108;
+    public static final int BAD_EMAIL = 4109;
+    public static final int FAKE_EMAIL = 4110;
+    public static final int PASSWORD_IS_TOO_LONG = 4111;
 
     // Ошибки входа в аккаунт
     public static final int INVALID_CREDENTIALS = 4200; // Неверные учетные данные

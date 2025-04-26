@@ -58,7 +58,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             } catch (io.jsonwebtoken.ExpiredJwtException e) {
                 throw new TokenExpiredException("Access токен истёк");
             } catch (JwtException e) {
-                throw new TokenInvalidException("Access токен недействителен");
+                throw new TokenInvalidException("Access токен недействителен " + e.getMessage());
             }
         }
 
@@ -73,7 +73,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
         if (request.getCookies() != null) {
             Optional<Cookie> cookie = Arrays.stream(request.getCookies())
-                    .filter(c -> "access_token".equals(c.getName()))
+                    .filter(c -> "dockins_access_token".equals(c.getName()))
                     .findFirst();
             return cookie.map(Cookie::getValue).orElse(null);
         }

@@ -8,15 +8,35 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.stepagin.dockins.domain.auth.exception.InvalidCredentialsException;
+import ru.stepagin.dockins.domain.external.mail.EmailSendingException;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<CustomErrorResponse> handleConstraintViolation(InvalidCredentialsException ex, HttpServletRequest request) {
-        return buildErrorResponse(HttpStatus.UNAUTHORIZED, "Ошибка ограничения данных", request, ex);
+    @ExceptionHandler(EmailSendingException.class)
+    public ResponseEntity<CustomErrorResponse> handleSendEmailException(EmailSendingException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.GATEWAY_TIMEOUT, ex.getMessage(), request, ex);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<CustomErrorResponse> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
+        StringBuilder messageBuilder = new StringBuilder("Не соблюдены ограничения данных: ");
+
+        ex.getConstraintViolations().forEach(violation -> {
+            messageBuilder
+                    .append("[")
+                    .append(violation.getPropertyPath())
+                    .append(": ")
+                    .append(violation.getMessage())
+                    .append("] ");
+        });
+
+        String message = messageBuilder.toString().trim();
+        CustomErrorResponse errorResponse = CustomErrorResponse.of(HttpStatus.BAD_REQUEST, message, request.getRequestURI());
+
+        logError(errorResponse.getErrorId(), ex);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -37,11 +57,6 @@ public class GlobalExceptionHandler {
 
         logError(errorResponse.getErrorId(), ex);
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<CustomErrorResponse> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Ошибка ограничения данных", request, ex);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
