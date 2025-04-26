@@ -1,6 +1,6 @@
 package ru.stepagin.dockins.domain.auth.exception;
 
-import ru.stepagin.dockins.exception.DomainErrorCodes;
+import ru.stepagin.dockins.domain.DomainErrorCodes;
 
 /**
  * Исключение выбрасывается, если введены неверные учетные данные пользователя.

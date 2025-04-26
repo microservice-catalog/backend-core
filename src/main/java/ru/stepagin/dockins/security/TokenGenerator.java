@@ -6,8 +6,8 @@ import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-import ru.stepagin.dockins.domain.auth.entity.AccountEntity;
-import ru.stepagin.dockins.service.SecretStorageService;
+import ru.stepagin.dockins.domain.user.entity.AccountEntity;
+import ru.stepagin.dockins.util.SecretStorageUtil;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -19,8 +19,8 @@ public class TokenGenerator {
     @Getter
     private final SecretKey key;
 
-    public TokenGenerator(SecretStorageService secretStorageService) {
-        this.key = Keys.hmacShaKeyFor(secretStorageService.getJwtSignatureKey());
+    public TokenGenerator(SecretStorageUtil secretStorageUtil) {
+        this.key = Keys.hmacShaKeyFor(secretStorageUtil.getJwtSignatureKey());
     }
 
     public String generateAccessToken(AccountEntity account) {

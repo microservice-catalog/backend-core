@@ -1,6 +1,6 @@
 package ru.stepagin.dockins.domain.auth.exception;
 
-import ru.stepagin.dockins.exception.DomainErrorCodes;
+import ru.stepagin.dockins.domain.DomainErrorCodes;
 
 public class BadRegistrationDataException extends AuthDomainException {
     public BadRegistrationDataException(String message, int code) {

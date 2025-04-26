@@ -2,6 +2,7 @@ package ru.stepagin.dockins.domain.auth.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ru.stepagin.dockins.domain.user.entity.AccountEntity;
 
 import java.time.LocalDateTime;
 

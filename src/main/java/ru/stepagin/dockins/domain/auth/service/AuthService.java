@@ -8,13 +8,13 @@ import org.springframework.validation.annotation.Validated;
 import ru.stepagin.dockins.api.v1.auth.dto.ConfirmEmailDto;
 import ru.stepagin.dockins.api.v1.auth.dto.LoginRequestDto;
 import ru.stepagin.dockins.api.v1.auth.dto.RegisterRequestDto;
+import ru.stepagin.dockins.domain.DomainErrorCodes;
 import ru.stepagin.dockins.domain.auth.exception.BadRegistrationDataException;
 import ru.stepagin.dockins.domain.auth.exception.EmailAlreadyExistsException;
 import ru.stepagin.dockins.domain.auth.exception.UsernameAlreadyExistsException;
-import ru.stepagin.dockins.domain.auth.repository.AccountRepository;
-import ru.stepagin.dockins.exception.DomainErrorCodes;
-import ru.stepagin.dockins.external.dadata.DadataValidationService;
-import ru.stepagin.dockins.external.mail.EmailConfirmationService;
+import ru.stepagin.dockins.domain.external.dadata.DadataValidationService;
+import ru.stepagin.dockins.domain.external.mail.EmailConfirmationService;
+import ru.stepagin.dockins.domain.user.repository.AccountRepository;
 import ru.stepagin.dockins.security.JwtService;
 
 @Service
