@@ -1,11 +1,12 @@
 package ru.stepagin.dockins.domain.auth.exception;
 
-/**
- * Исключение выбрасывается, если введены неверные учетные данные пользователя.
- * Возвращает статус 401 Unauthorized.
- */
-public class InvalidCredentialsException extends RuntimeException {
+public class InvalidCredentialsException extends BadLoginDataException {
     public InvalidCredentialsException(String message) {
         super(message);
     }
+
+    public InvalidCredentialsException(String message, int code) {
+        super(message, code);
+    }
+
 }

@@ -1,11 +1,13 @@
 package ru.stepagin.dockins.domain.auth.exception;
 
-/**
- * Исключение выбрасывается, если пользователь пытается войти в систему без подтверждения электронной почты.
- * Возвращает статус 403 Forbidden.
- */
-public class AccountNotConfirmedException extends RuntimeException {
+import ru.stepagin.dockins.exception.DomainErrorCodes;
+
+public class AccountNotConfirmedException extends BadLoginDataException {
     public AccountNotConfirmedException(String message) {
-        super(message);
+        super(message, DomainErrorCodes.EMAIL_NOT_CONFIRMED);
+    }
+
+    public AccountNotConfirmedException(String message, int code) {
+        super(message, code);
     }
 }

@@ -7,8 +7,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class DadataValidationService {
 
-    public void validateEmail(String email) {
+    public boolean validateEmail(String email) {
         // Заглушка проверки email через Dadata API
         // TODO: Реализовать вызов к реальному API, когда появятся креды
+        return true;
     }
 }

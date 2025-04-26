@@ -1,4 +1,4 @@
-package ru.stepagin.dockins.api.v1.auth;
+package ru.stepagin.dockins.api.v1.auth.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

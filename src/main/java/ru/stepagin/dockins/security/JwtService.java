@@ -32,6 +32,7 @@ public class JwtService {
     private final JwtParser jwtParser;
 
     public void registerNewAccount(RegisterRequestDto registerRequestDto) {
+
         AccountEntity account = AccountEntity.builder()
                 .username(registerRequestDto.getUsername())
                 .email(registerRequestDto.getEmail())
