@@ -6,7 +6,7 @@ import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-import ru.stepagin.dockins.domain.user.entity.AccountEntity;
+import ru.stepagin.dockins.core.user.entity.AccountEntity;
 import ru.stepagin.dockins.util.SecretStorageUtil;
 
 import javax.crypto.SecretKey;

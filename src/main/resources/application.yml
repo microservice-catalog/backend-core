@@ -29,6 +29,8 @@ spring:
             required: true
     ssl:
       enabled: true
+  cache:
+    type: simple
 
 app:
   secret:

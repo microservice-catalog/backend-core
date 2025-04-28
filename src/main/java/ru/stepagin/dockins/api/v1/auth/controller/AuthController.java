@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.stepagin.dockins.api.v1.auth.dto.ConfirmEmailDto;
 import ru.stepagin.dockins.api.v1.auth.dto.LoginRequestDto;
 import ru.stepagin.dockins.api.v1.auth.dto.RegisterRequestDto;
-import ru.stepagin.dockins.domain.auth.service.AuthService;
+import ru.stepagin.dockins.core.auth.service.AuthService;
 
 @RestController
 @RequestMapping("/api/v1/auth")

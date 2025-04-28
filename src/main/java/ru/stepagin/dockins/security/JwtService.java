@@ -11,12 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.stepagin.dockins.api.v1.auth.dto.LoginRequestDto;
 import ru.stepagin.dockins.api.v1.auth.dto.RegisterRequestDto;
-import ru.stepagin.dockins.domain.auth.exception.AccountNotConfirmedException;
-import ru.stepagin.dockins.domain.auth.exception.BadUsernameOrPasswordException;
-import ru.stepagin.dockins.domain.auth.exception.TokenExpiredException;
-import ru.stepagin.dockins.domain.auth.exception.TokenInvalidException;
-import ru.stepagin.dockins.domain.user.entity.AccountEntity;
-import ru.stepagin.dockins.domain.user.repository.AccountRepository;
+import ru.stepagin.dockins.core.auth.exception.AccountNotConfirmedException;
+import ru.stepagin.dockins.core.auth.exception.BadUsernameOrPasswordException;
+import ru.stepagin.dockins.core.auth.exception.TokenExpiredException;
+import ru.stepagin.dockins.core.auth.exception.TokenInvalidException;
+import ru.stepagin.dockins.core.user.entity.AccountEntity;
+import ru.stepagin.dockins.core.user.repository.AccountRepository;
 import ru.stepagin.dockins.util.RequestContextHolderUtil;
 
 import java.util.Arrays;

@@ -16,10 +16,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ru.stepagin.dockins.domain.auth.exception.TokenExpiredException;
-import ru.stepagin.dockins.domain.auth.exception.TokenInvalidException;
-import ru.stepagin.dockins.domain.user.entity.AccountEntity;
-import ru.stepagin.dockins.domain.user.repository.AccountRepository;
+import ru.stepagin.dockins.core.auth.exception.TokenExpiredException;
+import ru.stepagin.dockins.core.auth.exception.TokenInvalidException;
+import ru.stepagin.dockins.core.user.entity.AccountEntity;
+import ru.stepagin.dockins.core.user.repository.AccountRepository;
 
 import java.io.IOException;
 import java.util.Arrays;

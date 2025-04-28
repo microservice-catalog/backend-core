@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.stepagin.dockins.domain.external.mail.EmailSendingException;
+import ru.stepagin.dockins.core.external.mail.EmailSendingException;
 
 @Slf4j
 @RestControllerAdvice
