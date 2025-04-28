@@ -3,6 +3,7 @@ package ru.stepagin.dockins.core.user.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
+import ru.stepagin.dockins.core.common.exception.BadUpdateDataException;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
 
 import java.time.LocalDateTime;
@@ -61,4 +62,11 @@ public class AccountEntity {
 
     @Transient
     private List<ProjectInfoEntity> userProjects;
+
+    public void goodFieldsOrThrow() {
+        if (fullName != null && fullName.trim().length() > 30)
+            throw new BadUpdateDataException("Длина имени должна быть не более 30 символов.");
+        if (description != null && description.trim().length() > 100)
+            throw new BadUpdateDataException("Длина описания должна быть не более 100 символов.");
+    }
 }

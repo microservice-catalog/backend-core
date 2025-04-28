@@ -2,7 +2,7 @@ package ru.stepagin.dockins.util;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ru.stepagin.dockins.api.v1.project.exception.EncryptionException;
+import ru.stepagin.dockins.core.project.exception.EncryptionException;
 
 import java.nio.charset.StandardCharsets;
 

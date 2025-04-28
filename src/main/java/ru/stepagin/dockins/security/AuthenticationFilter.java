@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import ru.stepagin.dockins.core.auth.AccountPrincipal;
 import ru.stepagin.dockins.core.auth.exception.TokenExpiredException;
 import ru.stepagin.dockins.core.auth.exception.TokenInvalidException;
 import ru.stepagin.dockins.core.user.entity.AccountEntity;
@@ -49,8 +50,10 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                 AccountEntity account = accountRepository.findById(UUID.fromString(userId))
                         .orElseThrow(() -> new TokenInvalidException("Пользователь не найден"));
 
+                AccountPrincipal principal = new AccountPrincipal(account);
+
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        account, null, null
+                        principal, null, null
                 );
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);

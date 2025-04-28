@@ -10,9 +10,10 @@ import lombok.Setter;
 @Builder
 public class ProfileUpdateRequestDto {
 
-    @Size(max = 100)
+    @Size(max = 255)
     private String fullName;
 
-    @Size(max = 500)
+    @Size(max = 255)
     private String description;
+
 }

@@ -1,18 +1,13 @@
 package ru.stepagin.dockins.core.user.exception;
 
-import ru.stepagin.dockins.core.DomainErrorCodes;
+import lombok.Getter;
+import ru.stepagin.dockins.core.common.exception.CommonDomainException;
 
-public class UserDomainException extends RuntimeException {
-    int errorCode;
-
-    public UserDomainException(String message) {
-        super(message);
-        this.errorCode = DomainErrorCodes.BAD_UPDATE_DATA;
-    }
+@Getter
+public class UserDomainException extends CommonDomainException {
 
     public UserDomainException(String message, int code) {
-        super(message);
-        this.errorCode = code;
+        super(message, code);
     }
 
 }

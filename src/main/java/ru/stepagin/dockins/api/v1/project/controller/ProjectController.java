@@ -30,8 +30,8 @@ public class ProjectController {
 
     @GetMapping
     public ResponseEntity<PageResponse<PublicProjectShortResponseDto>> searchProjects(
-            @RequestParam(value = "query", required = false) String query,
-            @RequestParam(value = "tags", required = false) List<String> tags,
+            @RequestParam(value = "q", required = false) String query,
+            @RequestParam(value = "t", required = false) List<String> tags,
             @RequestParam(value = "page", required = false, defaultValue = "0") int page,
             @RequestParam(value = "limit", required = false, defaultValue = "20") int limit
     ) {

@@ -1,10 +1,12 @@
 package ru.stepagin.dockins.core.user.service;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.stepagin.dockins.api.v1.project.dto.PrivateProjectShortResponseDto;
 import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
 import ru.stepagin.dockins.api.v1.user.dto.ProfileResponseDto;
@@ -53,13 +55,14 @@ public class ProfileService {
                 .build();
     }
 
-    public void updateCurrentProfile(ProfileUpdateRequestDto dto) {
+    @Transactional
+    public void updateCurrentProfile(@Valid ProfileUpdateRequestDto dto) {
         AccountEntity currentUser = authService.getCurrentUser();
 
         if (dto.getFullName() != null)
-            currentUser.setFullName(dto.getFullName());
+            currentUser.setFullName(dto.getFullName().trim());
         if (dto.getDescription() != null)
-            currentUser.setDescription(dto.getDescription());
+            currentUser.setDescription(dto.getDescription().trim());
 
         authService.updateCurrentUserData(currentUser);
     }

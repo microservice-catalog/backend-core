@@ -78,7 +78,7 @@ public class FavouriteService {
     }
 
     public List<PublicProjectShortResponseDto> getUserFavourites(String username) {
-        AccountEntity user = accountRepository.findByUsername(username)
+        AccountEntity user = accountRepository.findByUsernameExactly(username)
                 .orElseThrow(() -> new ProjectNotFoundException("Пользователь не найден."));
 
         List<ProjectUserFavouriteEntity> favourites = favouriteRepository.findAllByUser(user);

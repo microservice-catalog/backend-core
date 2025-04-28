@@ -1,4 +1,4 @@
-package ru.stepagin.dockins.api.v1.project.exception;
+package ru.stepagin.dockins.core.project.exception;
 
 public class EncryptionException extends RuntimeException {
     public EncryptionException() {

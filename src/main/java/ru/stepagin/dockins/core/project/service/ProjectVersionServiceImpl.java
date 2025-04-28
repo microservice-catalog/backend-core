@@ -83,6 +83,7 @@ public class ProjectVersionServiceImpl implements ProjectVersionService {
         }
 
         version.goodFieldsOrThrow();
+        projectVersionRepository.save(version);
 
         return mapToVersionResponse(version);
     }

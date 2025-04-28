@@ -18,7 +18,7 @@ public class ProjectCreateRequestDto {
     private String title;
 
     @NotBlank
-    @Size(min = 3, max = 50)
+    @Size(min = 5, max = 50)
     private String projectName;
 
     private List<String> tags;

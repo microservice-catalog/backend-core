@@ -36,8 +36,8 @@ public class JwtService {
     @Transactional
     public AccountEntity registerNewAccount(@Valid RegisterRequestDto registerRequestDto) {
         AccountEntity account = AccountEntity.builder()
-                .username(registerRequestDto.getUsername())
-                .email(registerRequestDto.getEmail())
+                .username(registerRequestDto.getUsername().trim())
+                .email(registerRequestDto.getEmail().trim())
                 .password(passwordEncoder.encode(registerRequestDto.getPassword()))
                 .emailConfirmed(false)
                 .build();
@@ -60,6 +60,8 @@ public class JwtService {
         String refreshToken = tokenGenerator.generateRefreshToken(account);
 
         cookieService.setAuthCookies(accessToken, refreshToken, response);
+
+        accountRepository.updateLastLogin(account.getId());
     }
 
     public void refreshTokens(HttpServletResponse response) {

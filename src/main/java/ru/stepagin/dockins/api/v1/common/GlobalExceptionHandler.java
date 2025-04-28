@@ -5,14 +5,34 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.stepagin.dockins.core.DomainErrorCodes;
+import ru.stepagin.dockins.core.common.exception.BadUpdateDataException;
+import ru.stepagin.dockins.core.common.exception.DomainEntityNotFoundException;
 import ru.stepagin.dockins.core.external.mail.EmailSendingException;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(BadUpdateDataException.class)
+    public ResponseEntity<CustomErrorResponse> handleProjectDomainException(BadUpdateDataException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), ex.getErrorCode(), request, ex);
+    }
+
+    @ExceptionHandler(DomainEntityNotFoundException.class)
+    public ResponseEntity<CustomErrorResponse> handleSendEmailException(DomainEntityNotFoundException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request, ex);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<CustomErrorResponse> handleSendEmailException(HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.METHOD_NOT_ALLOWED, ex.getMessage(), request, ex);
+    }
 
     @ExceptionHandler(EmailSendingException.class)
     public ResponseEntity<CustomErrorResponse> handleSendEmailException(EmailSendingException ex, HttpServletRequest request) {
@@ -33,7 +53,12 @@ public class GlobalExceptionHandler {
         });
 
         String message = messageBuilder.toString().trim();
-        CustomErrorResponse errorResponse = CustomErrorResponse.of(HttpStatus.BAD_REQUEST, message, request.getRequestURI());
+        CustomErrorResponse errorResponse = CustomErrorResponse.of(
+                HttpStatus.BAD_REQUEST,
+                message,
+                request.getRequestURI(),
+                DomainErrorCodes.CONSTRAINT_VIOLATION
+        );
 
         logError(errorResponse.getErrorId(), ex);
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
@@ -53,10 +78,20 @@ public class GlobalExceptionHandler {
         });
 
         String message = messageBuilder.toString().trim();
-        CustomErrorResponse errorResponse = CustomErrorResponse.of(HttpStatus.BAD_REQUEST, message, request.getRequestURI());
+        CustomErrorResponse errorResponse = CustomErrorResponse.of(
+                HttpStatus.BAD_REQUEST,
+                message,
+                request.getRequestURI(),
+                DomainErrorCodes.CONSTRAINT_VIOLATION
+        );
 
         logError(errorResponse.getErrorId(), ex);
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<CustomErrorResponse> handleIllegalArgument(HttpMessageNotReadableException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request, ex);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -77,6 +112,13 @@ public class GlobalExceptionHandler {
     private ResponseEntity<CustomErrorResponse> buildErrorResponse(HttpStatus status, String message, HttpServletRequest request, Exception ex) {
         String path = request.getRequestURI();
         CustomErrorResponse errorResponse = CustomErrorResponse.of(status, message, path);
+        logError(errorResponse.getErrorId(), ex);
+        return new ResponseEntity<>(errorResponse, status);
+    }
+
+    private ResponseEntity<CustomErrorResponse> buildErrorResponse(HttpStatus status, String message, int code, HttpServletRequest request, Exception ex) {
+        String path = request.getRequestURI();
+        CustomErrorResponse errorResponse = CustomErrorResponse.of(status, message, path, code);
         logError(errorResponse.getErrorId(), ex);
         return new ResponseEntity<>(errorResponse, status);
     }

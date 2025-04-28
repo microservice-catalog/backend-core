@@ -20,10 +20,7 @@ import ru.stepagin.dockins.core.project.entity.ProjectVersionEntity;
 import ru.stepagin.dockins.core.project.entity.TagEntity;
 import ru.stepagin.dockins.core.project.exception.ProjectAlreadyExistsException;
 import ru.stepagin.dockins.core.project.exception.ProjectNotFoundException;
-import ru.stepagin.dockins.core.project.repository.ProjectInfoRepository;
-import ru.stepagin.dockins.core.project.repository.ProjectUserFavouriteRepository;
-import ru.stepagin.dockins.core.project.repository.ProjectUserPullRepository;
-import ru.stepagin.dockins.core.project.repository.ProjectUserWatchRepository;
+import ru.stepagin.dockins.core.project.repository.*;
 import ru.stepagin.dockins.core.project.service.helper.DockerCommandService;
 import ru.stepagin.dockins.core.project.service.helper.MarkdownDescriptionService;
 import ru.stepagin.dockins.core.project.service.helper.TagService;
@@ -46,8 +43,10 @@ public class ProjectServiceImpl implements ProjectService {
     private final AuthService authService;
     private final ProjectSearchService projectSearchService;
     private final TagService tagService;
+    private final ProjectVersionRepository projectVersionRepository;
 
     @Override
+    @Transactional
     public ProjectFullResponseDto createProject(@Valid ProjectCreateRequestDto requestDto) {
         AccountEntity currentUser = authService.getCurrentUser();
 
@@ -58,8 +57,8 @@ public class ProjectServiceImpl implements ProjectService {
 
         ProjectInfoEntity projectEntity = new ProjectInfoEntity();
         projectEntity.setAuthorAccount(currentUser);
-        projectEntity.setProjectName(requestDto.getProjectName());
-        projectEntity.setTitle(requestDto.getTitle());
+        projectEntity.setProjectName(requestDto.getProjectName().trim());
+        projectEntity.setTitle(requestDto.getTitle().trim());
         projectEntity.setDescription(markdownDescriptionService.generateDefaultDescription());
         projectEntity.setPrivate(Boolean.TRUE.equals(requestDto.getIsPrivate()));
         List<TagEntity> tags = tagService.findOrCreateTags(requestDto.getTags());
@@ -74,7 +73,11 @@ public class ProjectServiceImpl implements ProjectService {
         defaultVersion.setLinkDockerhub(requestDto.getDockerHubLink());
         defaultVersion.setDockerCommand(dockerCommandService.generateDockerCommand(requestDto.getDockerHubLink()));
 
-        // todo проверить, что они норм сохраняются default version
+        projectEntity.setDefaultProjectVersion(defaultVersion);
+
+        projectEntity.goodFieldsOrThrow();
+
+        projectVersionRepository.save(defaultVersion);
         projectRepository.save(projectEntity);
 
         return mapToFullDto(projectEntity);
@@ -87,8 +90,16 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public PageResponse<PublicProjectShortResponseDto> searchProjects(String query, List<String> tags, PageRequest pageRequest) {
-        Page<ProjectInfoEntity> results = projectSearchService.searchProjects(query, tags, pageRequest);
+    public PageResponse<PublicProjectShortResponseDto> searchProjects(
+            String query,
+            List<String> tags,
+            PageRequest pageRequest
+    ) {
+        Page<ProjectInfoEntity> results;
+        if ((query == null || query.isBlank()) && (tags == null || tags.isEmpty()))
+            results = projectRepository.findRecentProjects(pageRequest);
+        else
+            results = projectSearchService.searchProjects(query, tags, pageRequest);
 
         return PageResponse.of(results.map(this::mapToShortDto));
     }

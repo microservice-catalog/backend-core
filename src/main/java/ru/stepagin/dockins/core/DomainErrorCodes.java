@@ -2,6 +2,7 @@ package ru.stepagin.dockins.core;
 
 public class DomainErrorCodes {
     // Общие ошибки данных
+    public static final int CONSTRAINT_VIOLATION = 1400;
     public static final int ENTITY_NOT_FOUND = 1404;
 
     // Ошибки обновления данных
@@ -40,6 +41,11 @@ public class DomainErrorCodes {
     public static final int PROJECT_NOT_FOUND = 5100; // Проект не найден
     public static final int PROJECT_ALREADY_EXISTS = 5101; // Проект уже существует
     public static final int PROJECT_ACCESS_DENIED = 5102; // Доступ к проекту запрещён
+    public static final int PROJECT_NAME_IS_TOO_SHORT = 5103; // Имя пользователя слишком короткое
+    public static final int PROJECT_NAME_IS_TOO_LONG = 5104; // Имя пользователя слишком длинное
+    public static final int PROJECT_NAME_STARTS_WITH_BAD_SYMBOL = 5105;
+    public static final int PROJECT_NAME_ENDS_WITH_BAD_SYMBOL = 5106;
+    public static final int PROJECT_NAME_CONTAINS_BAD_SYMBOL = 5107;
 
     // Ошибки версий проектов
     public static final int VERSION_NOT_FOUND = 5200; // Версия не найдена

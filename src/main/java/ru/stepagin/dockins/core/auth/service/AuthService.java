@@ -77,9 +77,6 @@ public class AuthService {
         if (username.length() < 5) {
             throw new BadRegistrationDataException("Имя пользователя должно быть от 5 до 30 символов.", DomainErrorCodes.USERNAME_IS_TOO_SHORT);
         }
-        if (accountRepository.findByUsernameIgnoreCase(username).isPresent()) {
-            throw new UsernameAlreadyExistsException();
-        }
         if (!username.matches("^[a-zA-Z].*$")) {
             throw new BadRegistrationDataException("Имя пользователя должно начинаться с латинской буквы.", DomainErrorCodes.USERNAME_STARTS_WITH_BAD_SYMBOL);
         }
@@ -88,6 +85,9 @@ public class AuthService {
         }
         if (!username.matches("^[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9]$")) {
             throw new BadRegistrationDataException("Имя пользователя может содержать только латинские буквы, цифры и знак дефис.", DomainErrorCodes.USERNAME_CONTAINS_BAD_SYMBOL);
+        }
+        if (accountRepository.findByUsernameIgnoreCase(username).isPresent()) {
+            throw new UsernameAlreadyExistsException();
         }
     }
 
@@ -125,7 +125,7 @@ public class AuthService {
      */
     public AccountEntity getCurrentUser() {
         String username = getCurrentUsername();
-        return accountRepository.findByUsername(username)
+        return accountRepository.findByUsernameExactly(username)
                 .orElseThrow(() -> new IllegalStateException("Текущий пользователь не найден"));
     }
 
@@ -159,17 +159,12 @@ public class AuthService {
             throw new BadUpdateDataException("Невозможно изменить имя пользователя.");
         }
 
-        // Проверяем, что описание и имя не пустые (если нужно)
-        if (newUser.getFullName() != null && newUser.getFullName().isEmpty()) {
-            throw new BadUpdateDataException("Полное имя не может быть пустым.");
-        }
-
         // Обновляем поля
         currentUser.setFullName(newUser.getFullName());
         currentUser.setDescription(newUser.getDescription());
         currentUser.setAvatarUrl(newUser.getAvatarUrl());
 
-        // Сохраняем изменения в базе данных
+        currentUser.goodFieldsOrThrow();
         accountRepository.save(currentUser);
     }
 

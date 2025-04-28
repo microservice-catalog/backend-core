@@ -61,5 +61,13 @@ public interface ProjectInfoRepository extends JpaRepository<ProjectInfoEntity, 
             Pageable pageRequest
     );
 
+    @Query("""
+            select p from ProjectInfoEntity p
+            where p.deleted = false
+            and p.isPrivate = false
+            and p.authorAccount.deleted = false
+            order by p.defaultProjectVersion.createdOn DESC""")
+    Page<ProjectInfoEntity> findRecentProjects(Pageable pageable);
+
 
 }

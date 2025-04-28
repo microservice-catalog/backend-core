@@ -1,18 +1,11 @@
 package ru.stepagin.dockins.core.project.exception;
 
-import lombok.Getter;
+import ru.stepagin.dockins.core.common.exception.CommonDomainException;
 
-@Getter
-public class ProjectDomainException extends RuntimeException {
-    private final int errorCode;
+public class ProjectDomainException extends CommonDomainException {
 
     public ProjectDomainException(String message, int errorCode) {
-        super(message);
-        this.errorCode = errorCode;
+        super(message, errorCode);
     }
 
-    public ProjectDomainException(String message, int errorCode, Throwable cause) {
-        super(message, cause);
-        this.errorCode = errorCode;
-    }
 }

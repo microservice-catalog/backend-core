@@ -3,7 +3,7 @@ package ru.stepagin.dockins.core.project.service;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import lombok.RequiredArgsConstructor;
-import ru.stepagin.dockins.api.v1.project.exception.EncryptionException;
+import ru.stepagin.dockins.core.project.exception.EncryptionException;
 import ru.stepagin.dockins.util.SecretStorageUtil;
 
 import javax.crypto.Cipher;

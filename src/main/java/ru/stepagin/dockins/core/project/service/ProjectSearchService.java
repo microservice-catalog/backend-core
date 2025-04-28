@@ -10,7 +10,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
-import ru.stepagin.dockins.core.project.entity.ProjectTagEntity;
+import ru.stepagin.dockins.core.project.entity.TagEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,16 +28,16 @@ public class ProjectSearchService {
         // === Основной запрос на получение данных ===
         CriteriaQuery<ProjectInfoEntity> cq = cb.createQuery(ProjectInfoEntity.class);
         Root<ProjectInfoEntity> project = cq.from(ProjectInfoEntity.class);
-        Join<ProjectInfoEntity, ProjectTagEntity> projectTags = project.join("tags", JoinType.INNER);
+        Join<ProjectInfoEntity, TagEntity> tagEntity = project.join("tags", JoinType.INNER);  // Join на тег
 
-        List<Predicate> predicates = buildPredicates(cb, project, projectTags, query, tags);
+        List<Predicate> predicates = buildPredicates(cb, project, tagEntity, query, tags);
 
         cq.select(project)
                 .where(cb.and(predicates.toArray(new Predicate[0])));
 
         if (tags != null && !tags.isEmpty()) {
             cq.groupBy(project.get("id"));
-            cq.having(cb.equal(cb.countDistinct(projectTags.get("tag").get("name")), (long) tags.size()));
+            cq.having(cb.equal(cb.countDistinct(tagEntity.get("name")), (long) tags.size()));
         }
 
         List<ProjectInfoEntity> projects = entityManager.createQuery(cq)
@@ -48,9 +48,9 @@ public class ProjectSearchService {
         // === Отдельный запрос на подсчёт общего количества ===
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<ProjectInfoEntity> countRoot = countQuery.from(ProjectInfoEntity.class);
-        Join<ProjectInfoEntity, ProjectTagEntity> countTags = countRoot.join("tags", JoinType.INNER);
+        Join<ProjectInfoEntity, TagEntity> countTagEntity = countRoot.join("tags", JoinType.INNER);
 
-        List<Predicate> countPredicates = buildPredicates(cb, countRoot, countTags, query, tags);
+        List<Predicate> countPredicates = buildPredicates(cb, countRoot, countTagEntity, query, tags);
 
         countQuery.select(cb.countDistinct(countRoot.get("id")))
                 .where(cb.and(countPredicates.toArray(new Predicate[0])));
@@ -62,7 +62,7 @@ public class ProjectSearchService {
 
     private List<Predicate> buildPredicates(CriteriaBuilder cb,
                                             Root<ProjectInfoEntity> project,
-                                            Join<ProjectInfoEntity, ProjectTagEntity> projectTags,
+                                            Join<ProjectInfoEntity, TagEntity> tagEntity,
                                             String query,
                                             List<String> tags) {
         List<Predicate> predicates = new ArrayList<>();
@@ -81,9 +81,10 @@ public class ProjectSearchService {
         }
 
         if (tags != null && !tags.isEmpty()) {
-            predicates.add(projectTags.get("tag").get("name").in(tags));
+            predicates.add(tagEntity.get("name").in(tags));  // Фильтрация по тегам
         }
 
         return predicates;
     }
 }
+
