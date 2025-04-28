@@ -3,6 +3,8 @@ package ru.stepagin.dockins.core.project.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -19,4 +21,7 @@ public class TagEntity {
 
     @Column(nullable = false, unique = true)
     private String name;
+
+    @Builder.Default
+    private LocalDateTime createdOn = LocalDateTime.now();
 }

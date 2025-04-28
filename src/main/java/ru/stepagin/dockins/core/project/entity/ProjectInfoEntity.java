@@ -51,13 +51,26 @@ public class ProjectInfoEntity {
 
     private LocalDateTime deletedOn;
 
-    private LocalDateTime createdOn;
+    @Builder.Default
+    private LocalDateTime createdOn = LocalDateTime.now();
 
     private LocalDateTime updatedOn;
 
-    private Boolean isPrivate;
+    @Builder.Default
+    private Boolean isPrivate = false;
 
     @Transient
     private List<TagEntity> tags;
 
+    public void markAsDeleted() {
+        setDeleted(true);
+        setDeletedOn(java.time.LocalDateTime.now());
+    }
+
+    @Transient
+    public List<String> getTagsAsString() {
+        return this.tags.stream()
+                .map(TagEntity::getName)
+                .toList();
+    }
 }

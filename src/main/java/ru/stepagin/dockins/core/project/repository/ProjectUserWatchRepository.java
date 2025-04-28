@@ -15,5 +15,9 @@ public interface ProjectUserWatchRepository extends JpaRepository<ProjectUserWat
     @Cacheable(value = "projectStatsCache", key = "#projectId + '_watchesCount'", unless = "#result == null")
     long countByProjectId(@Param("id") UUID id);
 
+    @Query("select count(p) from ProjectUserWatchEntity p where p.user.id = :id")
+    @Cacheable(value = "projectUserStatsCache", key = "#userId + '_watchesCount'", unless = "#result == null")
+    long countByAccountId(@Param("id") UUID id);
+
 }
 

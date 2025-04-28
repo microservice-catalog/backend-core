@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.stepagin.dockins.api.v1.exception.CustomErrorResponse;
+import ru.stepagin.dockins.api.v1.handler.CustomErrorResponse;
 import ru.stepagin.dockins.core.auth.exception.*;
 
 @Slf4j

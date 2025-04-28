@@ -2,7 +2,7 @@ package ru.stepagin.dockins.core.project.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ru.stepagin.dockins.api.v1.project.service.CustomEnvDataEncryptor;
+import ru.stepagin.dockins.core.project.service.CustomEnvDataEncryptor;
 
 import java.time.LocalDateTime;
 
@@ -42,7 +42,8 @@ public class ProjectEnvParamEntity {
 
     private LocalDateTime deletedOn;
 
-    private LocalDateTime createdOn;
+    @Builder.Default
+    private LocalDateTime createdOn = LocalDateTime.now();
 
     private LocalDateTime updatedOn;
 
@@ -53,5 +54,10 @@ public class ProjectEnvParamEntity {
         } else {
             return name + "=";
         }
+    }
+
+    public void markAsDeleted() {
+        this.setDeleted(true);
+        this.setDeletedOn(LocalDateTime.now());
     }
 }

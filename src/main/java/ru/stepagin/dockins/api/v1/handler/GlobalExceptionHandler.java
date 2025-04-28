@@ -1,4 +1,4 @@
-package ru.stepagin.dockins.api.v1.exception;
+package ru.stepagin.dockins.api.v1.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;

@@ -34,7 +34,8 @@ public class EmailConfirmationEntity {
     @Builder.Default
     private Boolean used = false;
 
-    private LocalDateTime createdOn;
+    @Builder.Default
+    private LocalDateTime createdOn = LocalDateTime.now();
 
     private LocalDateTime updatedOn;
 

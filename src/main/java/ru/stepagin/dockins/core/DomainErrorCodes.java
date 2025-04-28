@@ -1,6 +1,12 @@
 package ru.stepagin.dockins.core;
 
 public class DomainErrorCodes {
+    // Общие ошибки данных
+    public static final int ENTITY_NOT_FOUND = 1404;
+
+    // Ошибки обновления данных
+    public static final int BAD_UPDATE_DATA = 3000;
+
     // Ошибки токенов
     public static final int TOKEN_INVALID = 4000; // Неверный токен
     public static final int TOKEN_EXPIRED = 4001; // Токен истёк
@@ -28,4 +34,26 @@ public class DomainErrorCodes {
     public static final int INSUFFICIENT_PRIVILEGES = 4301; // Недостаточно прав для выполнения действия
     public static final int RESOURCE_NOT_FOUND = 4302; // Ресурс не найден
     public static final int ACCOUNT_LOCKED = 4303; // Аккаунт заблокирован
+
+
+    // Ошибки проектов
+    public static final int PROJECT_NOT_FOUND = 5100; // Проект не найден
+    public static final int PROJECT_ALREADY_EXISTS = 5101; // Проект уже существует
+    public static final int PROJECT_ACCESS_DENIED = 5102; // Доступ к проекту запрещён
+
+    // Ошибки версий проектов
+    public static final int VERSION_NOT_FOUND = 5200; // Версия не найдена
+    public static final int VERSION_ALREADY_EXISTS = 5201; // Версия уже существует
+
+    // Ошибки параметров окружения
+    public static final int ENV_PARAM_NOT_FOUND = 5300; // Параметр окружения не найден
+    public static final int ENV_PARAM_ALREADY_EXISTS = 5301; // Параметр окружения уже существует
+
+    // Теги
+    public static final int TAG_INVALID_FORMAT = 5400;
+
+    // Внутренние ошибки проектов
+    public static final int INTERNAL_PROJECT_ERROR = 5500; // Внутренняя ошибка проекта
+
+
 }

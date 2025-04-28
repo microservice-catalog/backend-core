@@ -4,6 +4,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -16,6 +18,8 @@ import ru.stepagin.dockins.core.auth.exception.EmailAlreadyExistsException;
 import ru.stepagin.dockins.core.auth.exception.UsernameAlreadyExistsException;
 import ru.stepagin.dockins.core.external.dadata.DadataValidationService;
 import ru.stepagin.dockins.core.external.mail.EmailConfirmationService;
+import ru.stepagin.dockins.core.user.entity.AccountEntity;
+import ru.stepagin.dockins.core.user.exception.BadUpdateDataException;
 import ru.stepagin.dockins.core.user.repository.AccountRepository;
 import ru.stepagin.dockins.security.JwtService;
 
@@ -109,5 +113,60 @@ public class AuthService {
 //        if (!password.matches(".*[!@#$%^&*(),.?\":{}|<>].*")) {
 //            throw new BadRegistrationDataException("Пароль должен содержать хотя бы один спецсимвол.", DomainErrorCodes.PASSWORD_TOO_WEAK);
 //        }
+    }
+
+    /**
+     * Получаем текущего авторизованного пользователя.
+     *
+     * @return AccountEntity - текущий пользователь
+     */
+    public AccountEntity getCurrentUser() {
+        String username = getCurrentUsername();
+        return accountRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalStateException("Текущий пользователь не найден"));
+    }
+
+    /**
+     * Получаем имя текущего пользователя из SecurityContext.
+     *
+     * @return имя пользователя
+     */
+    private String getCurrentUsername() {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userDetails.getUsername();
+    }
+
+    /**
+     * Обновление данных текущего пользователя.
+     *
+     * @param newUser AccountEntity - текущий пользователь с новыми данными
+     */
+    @Transactional
+    public void updateCurrentUserData(AccountEntity newUser) {
+        // Получаем текущего пользователя
+        AccountEntity currentUser = getCurrentUser();
+
+        // Проверяем, что нельзя обновить email
+        if (!newUser.getEmail().equals(currentUser.getEmail())) {
+            throw new BadUpdateDataException("Невозможно изменить email.");
+        }
+
+        // Проверяем, что имя пользователя не может быть изменено (если такая логика нужна)
+        if (!newUser.getUsername().equals(currentUser.getUsername())) {
+            throw new BadUpdateDataException("Невозможно изменить имя пользователя.");
+        }
+
+        // Проверяем, что описание и имя не пустые (если нужно)
+        if (newUser.getFullName() != null && newUser.getFullName().isEmpty()) {
+            throw new BadUpdateDataException("Полное имя не может быть пустым.");
+        }
+
+        // Обновляем поля
+        currentUser.setFullName(newUser.getFullName());
+        currentUser.setDescription(newUser.getDescription());
+        currentUser.setAvatarUrl(newUser.getAvatarUrl());
+
+        // Сохраняем изменения в базе данных
+        accountRepository.save(currentUser);
     }
 }

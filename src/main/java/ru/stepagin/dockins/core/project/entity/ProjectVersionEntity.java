@@ -37,9 +37,13 @@ public class ProjectVersionEntity {
 
     private LocalDateTime deletedOn;
 
-    private LocalDateTime createdOn;
+    @Builder.Default
+    private LocalDateTime createdOn = LocalDateTime.now();
 
     private LocalDateTime updatedOn;
+
+    @Builder.Default
+    private Boolean isPrivate = false;
 
     private String linkGithub;
 

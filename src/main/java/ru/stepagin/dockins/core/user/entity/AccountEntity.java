@@ -48,7 +48,8 @@ public class AccountEntity {
 
     private LocalDateTime deletedOn;
 
-    private LocalDateTime createdOn;
+    @Builder.Default
+    private LocalDateTime createdOn = LocalDateTime.now();
 
     private LocalDateTime updatedOn;
 

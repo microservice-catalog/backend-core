@@ -26,5 +26,6 @@ public class ProjectUserPullEntity {
     @JoinColumn(name = "project_id")
     private ProjectInfoEntity project;
 
-    private LocalDateTime createdOn;
+    @Builder.Default
+    private LocalDateTime createdOn = LocalDateTime.now();
 }

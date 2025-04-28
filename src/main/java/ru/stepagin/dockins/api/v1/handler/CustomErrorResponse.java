@@ -1,4 +1,4 @@
-package ru.stepagin.dockins.api.v1.exception;
+package ru.stepagin.dockins.api.v1.handler;
 
 import lombok.Builder;
 import lombok.Getter;

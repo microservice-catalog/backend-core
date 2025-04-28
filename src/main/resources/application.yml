@@ -31,6 +31,16 @@ spring:
       enabled: true
   cache:
     type: simple
+  flyway:
+    enabled: true                   # Включаем Flyway
+    locations: classpath:db/migration  # Путь к папке миграций
+    baseline-on-migrate: true        # Позволяет начать миграции на существующей базе
+    validate-on-migrate: true        # Проверять, что структура миграций правильная
+    out-of-order: false              # Запрещаем накатывать миграции не по порядку
+    clean-disabled: true             # Запрещаем удалять все таблицы через Flyway.clean() (очень важно на продакшене!)
+    mixed: false                     # Только SQL-миграции одного типа (SQL или Java, но не вместе)
+    encoding: UTF-8                  # Кодировка файлов миграций
+    table: flyway_schema_history     # Название служебной таблицы
 
 app:
   secret:
