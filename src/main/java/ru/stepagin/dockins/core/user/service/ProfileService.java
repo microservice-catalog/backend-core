@@ -2,8 +2,11 @@ package ru.stepagin.dockins.core.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import ru.stepagin.dockins.api.v1.project.dto.ProjectShortResponseDto;
+import ru.stepagin.dockins.api.v1.project.dto.PrivateProjectShortResponseDto;
+import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
 import ru.stepagin.dockins.api.v1.user.dto.ProfileResponseDto;
 import ru.stepagin.dockins.api.v1.user.dto.ProfileUpdateRequestDto;
 import ru.stepagin.dockins.core.auth.service.AuthService;
@@ -28,26 +31,29 @@ public class ProfileService {
     private final ProjectUserWatchRepository projectUserWatchRepository;
 
     public ProfileResponseDto getCurrentProfile() {
+        PageRequest pageRequest = PageRequest.of(0, 10);
         AccountEntity currentUser = authService.getCurrentUser();
-        List<ProjectInfoEntity> projects = projectInfoRepository.findByAuthorAccountAndDeletedFalse(currentUser);
+        Page<ProjectInfoEntity> publicProjectsPage = projectInfoRepository.findByAuthorAccountAndPrivateFalse(currentUser, pageRequest);
+        Page<ProjectInfoEntity> privateProjectsPage = projectInfoRepository.findByAuthorAccountAndPrivateTrue(currentUser, pageRequest);
         long favouritesCount = projectUserFavouriteRepository.countByAccountId(currentUser.getId());
         long viewsCount = projectUserWatchRepository.countByAccountId(currentUser.getId());
 
-        List<UUID> publicProjects = projects.stream().map(ProjectInfoEntity::getId).toList();
-        long likesCount = projectUserFavouriteRepository.countByProjectIdIn(publicProjects);
+        List<UUID> publicProjectsIds = publicProjectsPage.map(ProjectInfoEntity::getId).toList();
+        long likesCount = projectUserFavouriteRepository.countByProjectIdIn(publicProjectsIds);
         return ProfileResponseDto.builder()
                 .username(currentUser.getUsername())
                 .fullName(currentUser.getFullName())
                 .description(currentUser.getDescription())
                 .avatarUrl(currentUser.getAvatarUrl())
-                .publicProjects(projects.stream().map(this::mapToShortDto).collect(Collectors.toList()))
+                .publicProjects(publicProjectsPage.stream().map(this::mapToShortDto).collect(Collectors.toList()))
+                .privateProjects(privateProjectsPage.stream().map(this::mapToShortDtoPrivate).collect(Collectors.toList()))
                 .favouritesCount(favouritesCount)
                 .viewsCount(viewsCount)
                 .likesCount(likesCount)
                 .build();
     }
 
-    public ProfileResponseDto updateCurrentProfile(ProfileUpdateRequestDto dto) {
+    public void updateCurrentProfile(ProfileUpdateRequestDto dto) {
         AccountEntity currentUser = authService.getCurrentUser();
 
         if (dto.getFullName() != null)
@@ -56,19 +62,26 @@ public class ProfileService {
             currentUser.setDescription(dto.getDescription());
 
         authService.updateCurrentUserData(currentUser);
-
-        return getCurrentProfile();
     }
 
-    private ProjectShortResponseDto mapToShortDto(ProjectInfoEntity entity) { // TODO ОБЪЕДИНИТЬ МАППЕРЫ
-        return ProjectShortResponseDto.builder()
+    private PublicProjectShortResponseDto mapToShortDto(ProjectInfoEntity entity) { // TODO ОБЪЕДИНИТЬ МАППЕРЫ
+        return PublicProjectShortResponseDto.builder()
                 .projectName(entity.getProjectName())
                 .title(entity.getTitle())
                 .authorUsername(entity.getAuthorAccount().getUsername())
                 .likesCount(0)  // todo
                 .downloadsCount(0)  // todo
                 .viewsCount(0)  // todo
-                .tags(List.of())
+                .tags(entity.getTagsAsString())
+                .build();
+    }
+
+    private PrivateProjectShortResponseDto mapToShortDtoPrivate(ProjectInfoEntity entity) { // TODO ОБЪЕДИНИТЬ МАППЕРЫ
+        return PrivateProjectShortResponseDto.builder()
+                .projectName(entity.getProjectName())
+                .title(entity.getTitle())
+                .authorUsername(entity.getAuthorAccount().getUsername())
+                .tags(entity.getTagsAsString())
                 .build();
     }
 }

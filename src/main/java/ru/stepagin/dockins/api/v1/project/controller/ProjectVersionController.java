@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionCreateRequestDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionResponseDto;
+import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionUpdateRequestDto;
 import ru.stepagin.dockins.api.v1.project.service.ProjectVersionService;
 
 @Slf4j
@@ -21,8 +22,16 @@ public class ProjectVersionController {
             @PathVariable String username,
             @PathVariable String projectName,
             @RequestBody ProjectVersionCreateRequestDto requestDto) {
-        ProjectVersionResponseDto responseDto = projectVersionService.createVersion(projectName, requestDto);
+        ProjectVersionResponseDto responseDto = projectVersionService.createVersion(username, projectName, requestDto);
         return ResponseEntity.status(201).body(responseDto);
+    }
+
+    @GetMapping
+    public ResponseEntity<ProjectVersionResponseDto> getDefaultVersion(
+            @PathVariable String username,
+            @PathVariable String projectName) {
+        ProjectVersionResponseDto responseDto = projectVersionService.getDefaultProjectVersion(username, projectName);
+        return ResponseEntity.ok(responseDto);
     }
 
     @GetMapping("/{versionName}")
@@ -30,17 +39,26 @@ public class ProjectVersionController {
             @PathVariable String username,
             @PathVariable String projectName,
             @PathVariable String versionName) {
-        ProjectVersionResponseDto responseDto = projectVersionService.getVersion(projectName, versionName);
+        ProjectVersionResponseDto responseDto = projectVersionService.getVersion(username, projectName, versionName);
         return ResponseEntity.ok(responseDto);
     }
 
-//    @PatchMapping("/{versionName}") todo
-//    public ResponseEntity<ProjectFullResponseDto> updateProject(
-//            @PathVariable String username,
-//            @PathVariable String projectName,
-//            @PathVariable String versionName,
-//            @RequestBody ProjectUpdateRequestDto requestDto) {
-//        ProjectFullResponseDto updatedProject = projectService.updateProject(projectName, versionName, requestDto);
-//        return ResponseEntity.ok(updatedProject);
-//    }
+    @PatchMapping("/{versionName}")
+    public ResponseEntity<ProjectVersionResponseDto> updateVersion(
+            @PathVariable String username,
+            @PathVariable String projectName,
+            @PathVariable String versionName,
+            @RequestBody ProjectVersionUpdateRequestDto requestDto) {
+        ProjectVersionResponseDto updatedProject = projectVersionService.updateVersion(username, projectName, versionName, requestDto);
+        return ResponseEntity.ok(updatedProject);
+    }
+
+    @DeleteMapping("/{versionName}")
+    public ResponseEntity<ProjectVersionResponseDto> deleteVersion(
+            @PathVariable String username,
+            @PathVariable String projectName,
+            @PathVariable String versionName) {
+        projectVersionService.deleteVersion(username, projectName, versionName);
+        return ResponseEntity.noContent().build();
+    }
 }

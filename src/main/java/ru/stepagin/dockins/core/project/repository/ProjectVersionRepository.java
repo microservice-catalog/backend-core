@@ -14,15 +14,10 @@ import java.util.UUID;
 public interface ProjectVersionRepository extends JpaRepository<ProjectVersionEntity, UUID> {
     @Query("""
             select (count(p) > 0) from ProjectVersionEntity p
-            where p.project = :project and upper(p.name) = upper(:name)""")
-    boolean existsByProjectAndName(@Param("project") ProjectInfoEntity project, @Param("name") String name);
-
-    @Query("""
-            select p from ProjectVersionEntity p
-            where upper(p.project.projectName) = upper(:projectName)
+            where p.project = :project
             and upper(p.name) = upper(:name)""")
-    Optional<ProjectVersionEntity> findByProjectNameAndVersionName(
-            @Param("projectName") String projectName,
+    boolean existsByProjectAndName(
+            @Param("project") ProjectInfoEntity project,
             @Param("name") String name
     );
 
@@ -31,7 +26,7 @@ public interface ProjectVersionRepository extends JpaRepository<ProjectVersionEn
             where upper(p.project.authorAccount.username) = upper(:username)
             and upper(p.project.projectName) = upper(:projectName)
             and upper(p.name) = upper(:name)""")
-    Optional<ProjectVersionEntity> findEnv(
+    Optional<ProjectVersionEntity> findByProjectNameAndVersionName(
             @Param("username") String username,
             @Param("projectName") String projectName,
             @Param("name") String name

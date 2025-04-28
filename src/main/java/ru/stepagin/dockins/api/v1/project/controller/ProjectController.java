@@ -5,10 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.stepagin.dockins.api.v1.common.PageResponse;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectCreateRequestDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectFullResponseDto;
-import ru.stepagin.dockins.api.v1.project.dto.ProjectShortResponseDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectUpdateRequestDto;
+import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
 import ru.stepagin.dockins.api.v1.project.service.ProjectService;
 
 import java.util.List;
@@ -28,13 +29,22 @@ public class ProjectController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProjectShortResponseDto>> searchProjects(
+    public ResponseEntity<PageResponse<PublicProjectShortResponseDto>> searchProjects(
             @RequestParam(value = "query", required = false) String query,
             @RequestParam(value = "tags", required = false) List<String> tags,
             @RequestParam(value = "page", required = false, defaultValue = "0") int page,
             @RequestParam(value = "limit", required = false, defaultValue = "20") int limit
     ) {
-        List<ProjectShortResponseDto> projects = projectService.searchProjects(query, tags, PageRequest.of(page, limit));
+        PageResponse<PublicProjectShortResponseDto> projects = projectService.searchProjects(query, tags, PageRequest.of(page, limit));
+        return ResponseEntity.ok(projects);
+    }
+
+    @GetMapping("/{username}")
+    public ResponseEntity<PageResponse<PublicProjectShortResponseDto>> getUserProjects(
+            @PathVariable String username,
+            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(value = "limit", required = false, defaultValue = "20") int limit) {
+        PageResponse<PublicProjectShortResponseDto> projects = projectService.getProjects(username, PageRequest.of(page, limit));
         return ResponseEntity.ok(projects);
     }
 
@@ -51,13 +61,15 @@ public class ProjectController {
             @PathVariable String username,
             @PathVariable String projectName,
             @RequestBody ProjectUpdateRequestDto requestDto) {
-        ProjectFullResponseDto updatedProject = projectService.updateProject(projectName, requestDto);
+        ProjectFullResponseDto updatedProject = projectService.updateProject(username, projectName, requestDto);
         return ResponseEntity.ok(updatedProject);
     }
 
     @DeleteMapping("/{username}/{projectName}")
-    public ResponseEntity<Void> deleteProject(@PathVariable String projectName) {
-        projectService.deleteProject(projectName);
+    public ResponseEntity<Void> deleteProject(
+            @PathVariable String username,
+            @PathVariable String projectName) {
+        projectService.deleteProject(username, projectName);
         return ResponseEntity.noContent().build();
     }
 }

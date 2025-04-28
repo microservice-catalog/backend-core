@@ -29,7 +29,13 @@ public class ProjectUserFavouriteEntity {
     @Builder.Default
     private LocalDateTime createdOn = LocalDateTime.now();
 
-    private Boolean deleted;
+    @Builder.Default
+    private boolean deleted = false;
 
     private LocalDateTime deletedOn;
+
+    public void markAsDeleted() {
+        setDeleted(true);
+        setDeletedOn(LocalDateTime.now());
+    }
 }

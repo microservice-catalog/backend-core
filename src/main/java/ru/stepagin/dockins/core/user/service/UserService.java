@@ -2,8 +2,10 @@ package ru.stepagin.dockins.core.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import ru.stepagin.dockins.api.v1.project.dto.ProjectShortResponseDto;
+import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
 import ru.stepagin.dockins.api.v1.user.dto.UserPublicProfileResponseDto;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
 import ru.stepagin.dockins.core.project.repository.ProjectInfoRepository;
@@ -22,11 +24,11 @@ public class UserService {
     private final AccountRepository accountRepository;
     private final ProjectInfoRepository projectRepository;
 
-    public UserPublicProfileResponseDto getPublicProfile(String username) {
+    public UserPublicProfileResponseDto getPublicProfile(String username, PageRequest pageRequest) {
         AccountEntity user = accountRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден."));
 
-        List<ProjectInfoEntity> projects = projectRepository.findByAuthorAccountAndDeletedFalse(user);
+        Page<ProjectInfoEntity> projects = projectRepository.findByAuthorAccountAndPrivateFalse(user, pageRequest);
 
         return UserPublicProfileResponseDto.builder()
                 .username(user.getUsername())
@@ -40,8 +42,8 @@ public class UserService {
                 .build();
     }
 
-    private ProjectShortResponseDto mapToShortDto(ProjectInfoEntity entity) {
-        return ProjectShortResponseDto.builder()
+    private PublicProjectShortResponseDto mapToShortDto(ProjectInfoEntity entity) {
+        return PublicProjectShortResponseDto.builder()
                 .projectName(entity.getProjectName())
                 .title(entity.getTitle())
                 .authorUsername(entity.getAuthorAccount().getUsername())

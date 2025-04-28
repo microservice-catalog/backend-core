@@ -42,9 +42,11 @@ public class AccountEntity {
 
     private String description;
 
-    private String version;
+    @Version
+    private Long version;
 
-    private Boolean deleted;
+    @Builder.Default
+    private boolean deleted = false;
 
     private LocalDateTime deletedOn;
 

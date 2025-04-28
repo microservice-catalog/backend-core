@@ -3,6 +3,7 @@ package ru.stepagin.dockins.core.project.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
+import ru.stepagin.dockins.core.common.exception.BadUpdateDataException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,11 +32,14 @@ public class ProjectVersionEntity {
     @Column(nullable = false)
     private String name;
 
-    private String version;
+    @Builder.Default
+    private boolean isPrivate = false;
 
-    private Boolean deleted;
+    private String linkGithub;
 
-    private LocalDateTime deletedOn;
+    private String linkDockerhub;
+
+    private String dockerCommand;
 
     @Builder.Default
     private LocalDateTime createdOn = LocalDateTime.now();
@@ -43,13 +47,17 @@ public class ProjectVersionEntity {
     private LocalDateTime updatedOn;
 
     @Builder.Default
-    private Boolean isPrivate = false;
+    private boolean deleted = false;
 
-    private String linkGithub;
+    private LocalDateTime deletedOn;
 
-    private String linkDockerhub;
+    @Version
+    private Long version;
 
-    private String dockerCommand;
+    public void markAsDeleted() {
+        this.deleted = true;
+        this.deletedOn = LocalDateTime.now();
+    }
 
     @Transient
     private List<ProjectEnvParamEntity> envParams;
@@ -74,4 +82,8 @@ public class ProjectVersionEntity {
                 .collect(Collectors.joining("\n"));
     }
 
+    public void goodFieldsOrThrow() {
+        if (!this.name.matches("^[a-zA-Z0-9-.]$"))
+            throw new BadUpdateDataException("Название версии может содержать латинские буквы, цифры, дефис и знак точки.");
+    }
 }

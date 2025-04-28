@@ -38,18 +38,12 @@ public class ProjectInfoEntity {
     private AccountEntity authorAccount;
 
     @ManyToOne
-    @JoinColumn(name = "default_project_version")
+    @JoinColumn(name = "default_project_version", nullable = false)
     private ProjectVersionEntity defaultProjectVersion;
 
     private String title;
 
     private String description;
-
-    private String version;
-
-    private Boolean deleted;
-
-    private LocalDateTime deletedOn;
 
     @Builder.Default
     private LocalDateTime createdOn = LocalDateTime.now();
@@ -57,10 +51,18 @@ public class ProjectInfoEntity {
     private LocalDateTime updatedOn;
 
     @Builder.Default
-    private Boolean isPrivate = false;
+    private boolean isPrivate = false;
 
     @Transient
     private List<TagEntity> tags;
+
+    @Version
+    private Long version;
+
+    @Builder.Default
+    private boolean deleted = false;
+
+    private LocalDateTime deletedOn;
 
     public void markAsDeleted() {
         setDeleted(true);

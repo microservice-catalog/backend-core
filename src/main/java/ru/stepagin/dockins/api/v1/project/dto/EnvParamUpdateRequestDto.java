@@ -12,4 +12,5 @@ public class EnvParamUpdateRequestDto {
     private Boolean required;
 
     private String defaultValue;
+
 }

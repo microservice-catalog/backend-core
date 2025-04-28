@@ -1,5 +1,6 @@
 package ru.stepagin.dockins.core.project.service;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ public class ProjectEnvParamServiceImpl implements ProjectEnvParamService {
 
     @Override
     @Transactional
-    public EnvParamDto addEnvParam(String projectName, String versionName, EnvParamCreateRequestDto dto) {
+    public EnvParamDto addEnvParam(String projectName, String versionName, @Valid EnvParamCreateRequestDto dto) {
         String username = authService.getCurrentUser().getUsername();
         ProjectVersionEntity version = findProjectVersion(username, projectName, versionName);
 
@@ -62,7 +63,12 @@ public class ProjectEnvParamServiceImpl implements ProjectEnvParamService {
 
     @Override
     @Transactional
-    public EnvParamDto updateEnvParam(String projectName, String versionName, String paramName, EnvParamUpdateRequestDto dto) {
+    public EnvParamDto updateEnvParam(
+            String projectName,
+            String versionName,
+            String paramName,
+            @Valid EnvParamUpdateRequestDto dto
+    ) {
         String username = authService.getCurrentUser().getUsername();
         ProjectEnvParamEntity param = findEnvParam(username, projectName, versionName, paramName);
 
@@ -94,7 +100,7 @@ public class ProjectEnvParamServiceImpl implements ProjectEnvParamService {
 
     private ProjectVersionEntity findProjectVersion(String username, String projectName, String versionName) {
         // todo проверка на deleted
-        return projectVersionRepository.findEnv(username, projectName, versionName)
+        return projectVersionRepository.findByProjectNameAndVersionName(username, projectName, versionName)
                 .orElseThrow(() -> new VersionNotFoundException("Версия проекта не найдена."));
     }
 

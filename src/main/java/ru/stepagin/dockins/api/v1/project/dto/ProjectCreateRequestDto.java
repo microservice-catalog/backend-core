@@ -21,9 +21,6 @@ public class ProjectCreateRequestDto {
     @Size(min = 3, max = 50)
     private String projectName;
 
-    @NotBlank
-    private String description;
-
     private List<String> tags;
 
     private String dockerHubLink;

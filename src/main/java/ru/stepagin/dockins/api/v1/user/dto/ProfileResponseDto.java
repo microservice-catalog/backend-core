@@ -3,7 +3,8 @@ package ru.stepagin.dockins.api.v1.user.dto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import ru.stepagin.dockins.api.v1.project.dto.ProjectShortResponseDto;
+import ru.stepagin.dockins.api.v1.project.dto.PrivateProjectShortResponseDto;
+import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
 
 import java.util.List;
 
@@ -20,7 +21,9 @@ public class ProfileResponseDto {
 
     private String avatarUrl;
 
-    private List<ProjectShortResponseDto> publicProjects;
+    private List<PublicProjectShortResponseDto> publicProjects;
+
+    private List<PrivateProjectShortResponseDto> privateProjects;
 
     private long favouritesCount;
 

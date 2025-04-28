@@ -1,10 +1,13 @@
 package ru.stepagin.dockins.core.project.service;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionCreateRequestDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionResponseDto;
+import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionUpdateRequestDto;
 import ru.stepagin.dockins.api.v1.project.service.ProjectVersionService;
 import ru.stepagin.dockins.core.auth.service.AuthService;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
@@ -14,7 +17,7 @@ import ru.stepagin.dockins.core.project.exception.VersionAlreadyExistsException;
 import ru.stepagin.dockins.core.project.exception.VersionNotFoundException;
 import ru.stepagin.dockins.core.project.repository.ProjectInfoRepository;
 import ru.stepagin.dockins.core.project.repository.ProjectVersionRepository;
-import ru.stepagin.dockins.core.user.entity.AccountEntity;
+import ru.stepagin.dockins.core.project.service.helper.DockerCommandService;
 
 import java.util.List;
 
@@ -26,13 +29,16 @@ public class ProjectVersionServiceImpl implements ProjectVersionService {
     private final ProjectInfoRepository projectRepository;
     private final ProjectVersionRepository projectVersionRepository;
     private final AuthService authService;
+    private final DockerCommandService dockerCommandService;
 
     @Override
-    public ProjectVersionResponseDto createVersion(String projectName, ProjectVersionCreateRequestDto requestDto) {
-        AccountEntity currentUser = authService.getCurrentUser();
-
-        ProjectInfoEntity project = projectRepository.findByAuthorAccountAndProjectName(currentUser.getUsername(), projectName)
-                .orElseThrow(() -> new ProjectNotFoundException("Проект не найден."));
+    @Transactional
+    public ProjectVersionResponseDto createVersion(
+            String username,
+            String projectName,
+            @Valid ProjectVersionCreateRequestDto requestDto
+    ) {
+        ProjectInfoEntity project = getProjectAndCheckAuthority(username, projectName);
 
         boolean exists = projectVersionRepository.existsByProjectAndName(project, requestDto.getVersionName());
         if (exists) {
@@ -42,8 +48,9 @@ public class ProjectVersionServiceImpl implements ProjectVersionService {
         ProjectVersionEntity version = ProjectVersionEntity.builder()
                 .project(project)
                 .name(requestDto.getVersionName())
-                .createdOn(java.time.LocalDateTime.now())
                 .build();
+
+        version.goodFieldsOrThrow();
 
         projectVersionRepository.save(version);
 
@@ -51,19 +58,68 @@ public class ProjectVersionServiceImpl implements ProjectVersionService {
     }
 
     @Override
-    public ProjectVersionResponseDto getVersion(String projectName, String versionName) {
-        ProjectVersionEntity version = projectVersionRepository.findByProjectNameAndVersionName(projectName, versionName)
-                .orElseThrow(() -> new VersionNotFoundException("Версия проекта не найдена."));
+    public ProjectVersionResponseDto getVersion(String username, String projectName, String versionName) {
+        ProjectVersionEntity version = projectVersionRepository.findByProjectNameAndVersionName(username, projectName, versionName)
+                .orElseThrow(VersionNotFoundException::new);
+
+        if (version.isPrivate()) {
+            authService.belongToCurrentUserOrThrow(version);
+        }
 
         return mapToVersionResponse(version);
     }
 
     @Override
-    public ProjectVersionResponseDto getDefaultProjectVersion(String projectName, String versionName) {
-        ProjectVersionEntity version = projectVersionRepository.findByProjectNameAndVersionName(projectName, versionName)
-                .orElseThrow(() -> new VersionNotFoundException("Версия проекта не найдена."));
+    @Transactional
+    public ProjectVersionResponseDto updateVersion(String username, String projectName, String versionName, ProjectVersionUpdateRequestDto requestDto) {
+        ProjectVersionEntity version = getVersionOrThrowAndCheckAuthority(username, projectName, versionName);
+
+        if (requestDto.getName() != null) version.setName(requestDto.getName());
+        if (requestDto.getIsPrivate() != null) version.setPrivate(requestDto.getIsPrivate());
+        if (requestDto.getGithubLink() != null) version.setLinkGithub(requestDto.getGithubLink());
+        if (requestDto.getDockerHubLink() != null) {
+            version.setLinkDockerhub(requestDto.getDockerHubLink());
+            version.setDockerCommand(dockerCommandService.generateDockerCommand(requestDto.getDockerHubLink()));
+        }
+
+        version.goodFieldsOrThrow();
 
         return mapToVersionResponse(version);
+    }
+
+    @Override
+    public ProjectVersionResponseDto getDefaultProjectVersion(String username, String projectName) {
+        ProjectVersionEntity version = projectRepository.findByUsernameAndProjectName(username, projectName)
+                .orElseThrow(VersionNotFoundException::new)
+                .getDefaultProjectVersion();
+
+        return mapToVersionResponse(version);
+    }
+
+    @Override
+    @Transactional
+    public void deleteVersion(String username, String projectName, String versionName) {
+        var version = getVersionOrThrowAndCheckAuthority(username, projectName, versionName);
+        version.markAsDeleted();
+        projectVersionRepository.save(version);
+    }
+
+    private ProjectInfoEntity getProjectAndCheckAuthority(String username, String projectName) {
+        ProjectInfoEntity project = projectRepository.findByUsernameAndProjectName(username, projectName)
+                .orElseThrow(ProjectNotFoundException::new);
+
+        authService.belongToCurrentUserOrThrow(project);
+
+        return project;
+    }
+
+    private ProjectVersionEntity getVersionOrThrowAndCheckAuthority(String username, String projectName, String versionName) {
+        ProjectVersionEntity version = projectVersionRepository.findByProjectNameAndVersionName(username, projectName, versionName)
+                .orElseThrow(VersionNotFoundException::new);
+
+        authService.belongToCurrentUserOrThrow(version);
+
+        return version;
     }
 
     private ProjectVersionResponseDto mapToVersionResponse(ProjectVersionEntity version) {

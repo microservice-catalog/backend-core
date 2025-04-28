@@ -9,19 +9,13 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-public class ProjectShortResponseDto {
+public class PrivateProjectShortResponseDto {
 
     private String projectName;
 
     private String title;
 
     private String authorUsername;
-
-    private long likesCount;
-
-    private long downloadsCount;
-
-    private long viewsCount;
 
     private List<String> tags;
 }

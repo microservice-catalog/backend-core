@@ -6,4 +6,8 @@ public class VersionNotFoundException extends ProjectDomainException {
     public VersionNotFoundException(String message) {
         super(message, DomainErrorCodes.VERSION_NOT_FOUND);
     }
+
+    public VersionNotFoundException() {
+        super("Версия проекта не найдена.", DomainErrorCodes.VERSION_NOT_FOUND);
+    }
 }

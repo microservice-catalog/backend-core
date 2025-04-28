@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.stepagin.dockins.api.v1.project.dto.FavouriteStatusResponseDto;
-import ru.stepagin.dockins.api.v1.project.dto.ProjectShortResponseDto;
+import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
 import ru.stepagin.dockins.api.v1.project.enumeration.FavouriteStatus;
 import ru.stepagin.dockins.core.auth.service.AuthService;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
@@ -32,12 +32,12 @@ public class FavouriteService {
     public FavouriteStatusResponseDto addFavourite(String username, String projectName) {
         AccountEntity currentUser = authService.getCurrentUser();
 
-        ProjectInfoEntity project = projectRepository.findByAuthorAccountAndProjectName(username, projectName)
-                .orElseThrow(() -> new ProjectNotFoundException("Проект не найден."));
+        ProjectInfoEntity projectToLike = projectRepository.findByUsernameAndProjectName(username, projectName)
+                .orElseThrow(ProjectNotFoundException::new);
 
-        Optional<ProjectUserFavouriteEntity> existing = favouriteRepository.findByUserAndProject(currentUser, project);
+        Optional<ProjectUserFavouriteEntity> existing = favouriteRepository.findByUserAndProject(currentUser, projectToLike);
 
-        if (existing.isPresent() && !existing.get().getDeleted()) {
+        if (existing.isPresent() && !existing.get().isDeleted()) {
             return new FavouriteStatusResponseDto(FavouriteStatus.ALREADY_SET);
         }
 
@@ -48,7 +48,7 @@ public class FavouriteService {
         } else {
             ProjectUserFavouriteEntity newFavourite = ProjectUserFavouriteEntity.builder()
                     .user(currentUser)
-                    .project(project)
+                    .project(projectToLike)
                     .createdOn(java.time.LocalDateTime.now())
                     .deleted(false)
                     .build();
@@ -61,24 +61,23 @@ public class FavouriteService {
     public FavouriteStatusResponseDto removeFavourite(String username, String projectName) {
         AccountEntity currentUser = authService.getCurrentUser();
 
-        ProjectInfoEntity project = projectRepository.findByAuthorAccountAndProjectName(username, projectName)
-                .orElseThrow(() -> new ProjectNotFoundException("Проект не найден."));
+        ProjectInfoEntity projectToLike = projectRepository.findByUsernameAndProjectName(username, projectName)
+                .orElseThrow(ProjectNotFoundException::new);
 
-        Optional<ProjectUserFavouriteEntity> existing = favouriteRepository.findByUserAndProject(currentUser, project);
+        Optional<ProjectUserFavouriteEntity> existing = favouriteRepository.findByUserAndProject(currentUser, projectToLike);
 
-        if (existing.isEmpty() || existing.get().getDeleted()) {
+        if (existing.isEmpty() || existing.get().isDeleted()) {
             return new FavouriteStatusResponseDto(FavouriteStatus.ALREADY_RELEASED);
         }
 
         ProjectUserFavouriteEntity fav = existing.get();
-        fav.setDeleted(true);
-        fav.setDeletedOn(java.time.LocalDateTime.now());
+        fav.markAsDeleted();
         favouriteRepository.save(fav);
 
         return new FavouriteStatusResponseDto(FavouriteStatus.SUCCESSFULLY_RELEASED);
     }
 
-    public List<ProjectShortResponseDto> getUserFavourites(String username) {
+    public List<PublicProjectShortResponseDto> getUserFavourites(String username) {
         AccountEntity user = accountRepository.findByUsername(username)
                 .orElseThrow(() -> new ProjectNotFoundException("Пользователь не найден."));
 
@@ -89,7 +88,7 @@ public class FavouriteService {
                 .collect(Collectors.toList());
     }
 
-    public List<ProjectShortResponseDto> getCurrentUserFavourites() {
+    public List<PublicProjectShortResponseDto> getCurrentUserFavourites() {
         AccountEntity user = authService.getCurrentUser();
 
         List<ProjectUserFavouriteEntity> favourites = favouriteRepository.findAllByUser(user);
@@ -99,8 +98,8 @@ public class FavouriteService {
                 .collect(Collectors.toList());
     }
 
-    private ProjectShortResponseDto mapToShortDto(ProjectInfoEntity entity) {
-        return ProjectShortResponseDto.builder()
+    private PublicProjectShortResponseDto mapToShortDto(ProjectInfoEntity entity) {
+        return PublicProjectShortResponseDto.builder()
                 .projectName(entity.getProjectName())
                 .title(entity.getTitle())
                 .authorUsername(entity.getAuthorAccount().getUsername())

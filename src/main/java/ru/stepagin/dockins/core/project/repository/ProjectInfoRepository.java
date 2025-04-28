@@ -1,5 +1,7 @@
 package ru.stepagin.dockins.core.project.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -7,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
 import ru.stepagin.dockins.core.user.entity.AccountEntity;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,19 +33,32 @@ public interface ProjectInfoRepository extends JpaRepository<ProjectInfoEntity, 
 
     @Query("""
             select p from ProjectInfoEntity p
-            where p.authorAccount.username = :authorAccount
-            and upper(p.projectName) = upper(:projectName)""")
-    Optional<ProjectInfoEntity> findByAuthorAccountAndProjectName(
-            @Param("authorAccount") String authorUsername,
-            @Param("projectName") String projectName
+            where p.authorAccount = :authorAccount
+            and p.isPrivate = false
+            and p.deleted = false""")
+    Page<ProjectInfoEntity> findByAuthorAccountAndPrivateFalse(
+            @Param("authorAccount") AccountEntity authorAccount,
+            Pageable pageRequest
+    );
+
+    @Query("""
+            select p from ProjectInfoEntity p
+            where p.authorAccount.username = :username
+            and p.isPrivate = false
+            and p.deleted = false""")
+    Page<ProjectInfoEntity> findByAuthorAccountAndPrivateFalse(
+            @Param("username") String username,
+            Pageable pageRequest
     );
 
     @Query("""
             select p from ProjectInfoEntity p
             where p.authorAccount = :authorAccount
+            and p.isPrivate = true
             and p.deleted = false""")
-    List<ProjectInfoEntity> findByAuthorAccountAndDeletedFalse(
-            @Param("authorAccount") AccountEntity authorAccount
+    Page<ProjectInfoEntity> findByAuthorAccountAndPrivateTrue(
+            @Param("authorAccount") AccountEntity authorAccount,
+            Pageable pageRequest
     );
 
 

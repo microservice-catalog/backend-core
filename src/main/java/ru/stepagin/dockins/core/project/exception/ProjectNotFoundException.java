@@ -6,4 +6,9 @@ public class ProjectNotFoundException extends ProjectDomainException {
     public ProjectNotFoundException(String message) {
         super(message, DomainErrorCodes.PROJECT_NOT_FOUND);
     }
+
+    public ProjectNotFoundException() {
+        super("Проект не найден.", DomainErrorCodes.PROJECT_NOT_FOUND);
+    }
+
 }

@@ -1,4 +1,4 @@
-package ru.stepagin.dockins.api.v1;
+package ru.stepagin.dockins.api.v1.common;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

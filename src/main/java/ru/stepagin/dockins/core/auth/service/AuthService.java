@@ -13,13 +13,16 @@ import ru.stepagin.dockins.api.v1.auth.dto.ConfirmEmailDto;
 import ru.stepagin.dockins.api.v1.auth.dto.LoginRequestDto;
 import ru.stepagin.dockins.api.v1.auth.dto.RegisterRequestDto;
 import ru.stepagin.dockins.core.DomainErrorCodes;
+import ru.stepagin.dockins.core.auth.exception.ActionNotAllowedException;
 import ru.stepagin.dockins.core.auth.exception.BadRegistrationDataException;
 import ru.stepagin.dockins.core.auth.exception.EmailAlreadyExistsException;
 import ru.stepagin.dockins.core.auth.exception.UsernameAlreadyExistsException;
+import ru.stepagin.dockins.core.common.exception.BadUpdateDataException;
 import ru.stepagin.dockins.core.external.dadata.DadataValidationService;
 import ru.stepagin.dockins.core.external.mail.EmailConfirmationService;
+import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
+import ru.stepagin.dockins.core.project.entity.ProjectVersionEntity;
 import ru.stepagin.dockins.core.user.entity.AccountEntity;
-import ru.stepagin.dockins.core.user.exception.BadUpdateDataException;
 import ru.stepagin.dockins.core.user.repository.AccountRepository;
 import ru.stepagin.dockins.security.JwtService;
 
@@ -168,5 +171,16 @@ public class AuthService {
 
         // Сохраняем изменения в базе данных
         accountRepository.save(currentUser);
+    }
+
+    public void belongToCurrentUserOrThrow(ProjectInfoEntity project) {
+        AccountEntity currentUser = this.getCurrentUser();
+        if (!project.getAuthorAccount().getId().equals(currentUser.getId())) {
+            throw new ActionNotAllowedException(); // todo заменить на 404 Not Found
+        }
+    }
+
+    public void belongToCurrentUserOrThrow(ProjectVersionEntity version) {
+        belongToCurrentUserOrThrow(version.getProject());
     }
 }

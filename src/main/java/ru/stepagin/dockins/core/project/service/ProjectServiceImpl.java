@@ -1,16 +1,23 @@
 package ru.stepagin.dockins.core.project.service;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+import ru.stepagin.dockins.api.v1.common.PageResponse;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectCreateRequestDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectFullResponseDto;
-import ru.stepagin.dockins.api.v1.project.dto.ProjectShortResponseDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectUpdateRequestDto;
+import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
 import ru.stepagin.dockins.api.v1.project.service.ProjectService;
 import ru.stepagin.dockins.core.auth.service.AuthService;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
+import ru.stepagin.dockins.core.project.entity.ProjectVersionEntity;
+import ru.stepagin.dockins.core.project.entity.TagEntity;
 import ru.stepagin.dockins.core.project.exception.ProjectAlreadyExistsException;
 import ru.stepagin.dockins.core.project.exception.ProjectNotFoundException;
 import ru.stepagin.dockins.core.project.repository.ProjectInfoRepository;
@@ -19,13 +26,14 @@ import ru.stepagin.dockins.core.project.repository.ProjectUserPullRepository;
 import ru.stepagin.dockins.core.project.repository.ProjectUserWatchRepository;
 import ru.stepagin.dockins.core.project.service.helper.DockerCommandService;
 import ru.stepagin.dockins.core.project.service.helper.MarkdownDescriptionService;
+import ru.stepagin.dockins.core.project.service.helper.TagService;
 import ru.stepagin.dockins.core.user.entity.AccountEntity;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@Validated
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
 
@@ -37,9 +45,10 @@ public class ProjectServiceImpl implements ProjectService {
     private final MarkdownDescriptionService markdownDescriptionService;
     private final AuthService authService;
     private final ProjectSearchService projectSearchService;
+    private final TagService tagService;
 
     @Override
-    public ProjectFullResponseDto createProject(ProjectCreateRequestDto requestDto) {
+    public ProjectFullResponseDto createProject(@Valid ProjectCreateRequestDto requestDto) {
         AccountEntity currentUser = authService.getCurrentUser();
 
         boolean exists = projectRepository.existsByAuthorAccountAndProjectName(currentUser, requestDto.getProjectName());
@@ -47,50 +56,73 @@ public class ProjectServiceImpl implements ProjectService {
             throw new ProjectAlreadyExistsException("Проект с таким названием уже существует у пользователя.");
         }
 
-        ProjectInfoEntity entity = new ProjectInfoEntity();
-        entity.setProjectName(requestDto.getProjectName());
-        entity.setTitle(requestDto.getTitle());
-        entity.setDescription(requestDto.getDescription() != null ? requestDto.getDescription() : markdownDescriptionService.generateDefaultDescription());
-        entity.setAuthorAccount(currentUser);
-        entity.setIsPrivate(Boolean.TRUE.equals(requestDto.getIsPrivate()));
+        ProjectInfoEntity projectEntity = new ProjectInfoEntity();
+        projectEntity.setAuthorAccount(currentUser);
+        projectEntity.setProjectName(requestDto.getProjectName());
+        projectEntity.setTitle(requestDto.getTitle());
+        projectEntity.setDescription(markdownDescriptionService.generateDefaultDescription());
+        projectEntity.setPrivate(Boolean.TRUE.equals(requestDto.getIsPrivate()));
+        List<TagEntity> tags = tagService.findOrCreateTags(requestDto.getTags());
+        projectEntity.setTags(tags);
 
-        entity.setCreatedOn(java.time.LocalDateTime.now());
+        projectEntity.setCreatedOn(java.time.LocalDateTime.now());
 
-        projectRepository.save(entity);
+        ProjectVersionEntity defaultVersion = new ProjectVersionEntity();
+        defaultVersion.setName("default");
+        defaultVersion.setProject(projectEntity);
+        defaultVersion.setLinkGithub(requestDto.getGithubLink());
+        defaultVersion.setLinkDockerhub(requestDto.getDockerHubLink());
+        defaultVersion.setDockerCommand(dockerCommandService.generateDockerCommand(requestDto.getDockerHubLink()));
 
-        // Привязка тегов и генерация docker команды будет потом
+        // todo проверить, что они норм сохраняются default version
+        projectRepository.save(projectEntity);
 
-        return mapToFullDto(entity);
+        return mapToFullDto(projectEntity);
     }
 
     @Override
-    public List<ProjectShortResponseDto> searchProjects(String query, List<String> tags, PageRequest pageRequest) {
-        List<ProjectInfoEntity> results = projectSearchService.searchProjects(query, tags, pageRequest);
+    public PageResponse<PublicProjectShortResponseDto> getProjects(String username, PageRequest pageRequest) {
+        Page<ProjectInfoEntity> page = projectRepository.findByAuthorAccountAndPrivateFalse(username, pageRequest);
+        return PageResponse.of(page.map(this::mapToShortDto));
+    }
 
-        return results.stream().map(this::mapToShortDto).collect(Collectors.toList());
+    @Override
+    public PageResponse<PublicProjectShortResponseDto> searchProjects(String query, List<String> tags, PageRequest pageRequest) {
+        Page<ProjectInfoEntity> results = projectSearchService.searchProjects(query, tags, pageRequest);
+
+        return PageResponse.of(results.map(this::mapToShortDto));
     }
 
     @Override
     public ProjectFullResponseDto getProject(String username, String projectName) {
         ProjectInfoEntity entity = projectRepository.findByUsernameAndProjectName(username, projectName)
-                .orElseThrow(() -> new ProjectNotFoundException("Проект не найден."));
+                .orElseThrow(ProjectNotFoundException::new);
 
         return mapToFullDto(entity);
     }
 
     @Override
-    public ProjectFullResponseDto updateProject(String projectName, ProjectUpdateRequestDto requestDto) {
-        AccountEntity currentUser = authService.getCurrentUser();
+    @Transactional
+    public ProjectFullResponseDto updateProject(
+            String username,
+            String projectName,
+            @Valid ProjectUpdateRequestDto requestDto
+    ) {
+        ProjectInfoEntity entity = projectRepository.findByUsernameAndProjectName(username, projectName)
+                .orElseThrow(ProjectNotFoundException::new);
 
-        ProjectInfoEntity entity = projectRepository.findByAuthorAccountAndProjectName(currentUser.getUsername(), projectName)
-                .orElseThrow(() -> new ProjectNotFoundException("Проект не найден."));
+        authService.belongToCurrentUserOrThrow(entity);
 
-        if (requestDto.getTitle() != null) entity.setTitle(requestDto.getTitle());
-        if (requestDto.getDescription() != null) entity.setDescription(requestDto.getDescription());
+        if (requestDto.getTitle() != null)
+            entity.setTitle(requestDto.getTitle());
+        if (requestDto.getDescription() != null)
+            entity.setDescription(requestDto.getDescription());
         if (requestDto.getDockerHubLink() != null)
-            entity.setLinkDockerhub(requestDto.getDockerHubLink()); // todo: ссылки у версий
-        if (requestDto.getGithubLink() != null) entity.setLinkGithub(requestDto.getGithubLink());
-        if (requestDto.getIsPrivate() != null) entity.setIsPrivate(requestDto.getIsPrivate());
+            entity.getDefaultProjectVersion().setLinkDockerhub(requestDto.getDockerHubLink());
+        if (requestDto.getGithubLink() != null)
+            entity.getDefaultProjectVersion().setLinkGithub(requestDto.getGithubLink());
+        if (requestDto.getIsPrivate() != null)
+            entity.setPrivate(requestDto.getIsPrivate());
 
         entity.setUpdatedOn(java.time.LocalDateTime.now());
 
@@ -100,11 +132,11 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void deleteProject(String projectName) {
-        AccountEntity currentUser = authService.getCurrentUser();
+    public void deleteProject(String username, String projectName) {
+        ProjectInfoEntity entity = projectRepository.findByUsernameAndProjectName(username, projectName)
+                .orElseThrow(ProjectNotFoundException::new);
 
-        ProjectInfoEntity entity = projectRepository.findByAuthorAccountAndProjectName(currentUser.getUsername(), projectName)
-                .orElseThrow(() -> new ProjectNotFoundException("Проект не найден."));
+        authService.belongToCurrentUserOrThrow(entity);
 
         entity.markAsDeleted();
 
@@ -121,10 +153,10 @@ public class ProjectServiceImpl implements ProjectService {
                 .title(entity.getTitle())
                 .authorUsername(entity.getAuthorAccount().getUsername())
                 .description(entity.getDescription())
-                .tags(entity.getTagsAsString()) // позже будет загрузка реальных тегов
-                .dockerHubLink(entity.getLinkDockerhub()) // todo
-                .githubLink(entity.getLinkGithub())
-                .dockerCommand(dockerCommandService.generateDockerCommand(entity.getLinkDockerhub()))
+                .tags(entity.getTagsAsString())
+                .dockerHubLink(entity.getDefaultProjectVersion().getLinkDockerhub())
+                .githubLink(entity.getDefaultProjectVersion().getLinkGithub())
+                .dockerCommand(dockerCommandService.generateDockerCommand(entity.getDefaultProjectVersion().getLinkDockerhub()))
                 .envParameters(List.of()) // todo
                 .likesCount(likesCount)
                 .downloadsCount(downloadsCount)
@@ -133,12 +165,12 @@ public class ProjectServiceImpl implements ProjectService {
                 .build();
     }
 
-    private ProjectShortResponseDto mapToShortDto(ProjectInfoEntity entity) {
+    private PublicProjectShortResponseDto mapToShortDto(ProjectInfoEntity entity) {
         long likesCount = projectUserFavouriteRepository.countByProjectId(entity.getId());
         long downloadsCount = projectUserPullRepository.countByProjectId(entity.getId());
         long viewsCount = projectUserWatchRepository.countByProjectId(entity.getId());
 
-        return ProjectShortResponseDto.builder()
+        return PublicProjectShortResponseDto.builder()
                 .projectName(entity.getProjectName())
                 .title(entity.getTitle())
                 .authorUsername(entity.getAuthorAccount().getUsername())
