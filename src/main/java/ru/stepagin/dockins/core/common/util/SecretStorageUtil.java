@@ -1,4 +1,4 @@
-package ru.stepagin.dockins.util;
+package ru.stepagin.dockins.core.common.util;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

@@ -17,7 +17,6 @@ import ru.stepagin.dockins.core.auth.exception.TokenExpiredException;
 import ru.stepagin.dockins.core.auth.exception.TokenInvalidException;
 import ru.stepagin.dockins.core.user.entity.AccountEntity;
 import ru.stepagin.dockins.core.user.repository.AccountRepository;
-import ru.stepagin.dockins.util.RequestContextHolderUtil;
 
 import java.util.Arrays;
 import java.util.Optional;
