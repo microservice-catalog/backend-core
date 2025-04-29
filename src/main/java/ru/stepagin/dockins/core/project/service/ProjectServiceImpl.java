@@ -8,7 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import ru.stepagin.dockins.api.v1.common.PageResponse;
+import ru.stepagin.dockins.api.common.PageResponse;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectCreateRequestDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectFullResponseDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectUpdateRequestDto;

@@ -2,7 +2,7 @@ package ru.stepagin.dockins.api.v1.project.service;
 
 import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
-import ru.stepagin.dockins.api.v1.common.PageResponse;
+import ru.stepagin.dockins.api.common.PageResponse;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectCreateRequestDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectFullResponseDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectUpdateRequestDto;

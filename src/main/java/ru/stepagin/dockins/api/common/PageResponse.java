@@ -1,4 +1,4 @@
-package ru.stepagin.dockins.api.v1.common;
+package ru.stepagin.dockins.api.common;
 
 import lombok.*;
 import org.springframework.data.domain.Page;
