@@ -6,12 +6,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.stepagin.dockins.api.v1.project.dto.FavouriteStatusResponseDto;
 import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
-import ru.stepagin.dockins.api.v1.project.enumeration.FavouriteStatus;
 import ru.stepagin.dockins.api.v1.project.service.ProjectDomainFavouriteServicePort;
 import ru.stepagin.dockins.api.v1.user.service.UserDomainFavouriteServicePort;
 import ru.stepagin.dockins.core.auth.service.AuthServiceImpl;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
 import ru.stepagin.dockins.core.project.entity.ProjectUserFavouriteEntity;
+import ru.stepagin.dockins.core.project.enumeration.FavouriteStatus;
 import ru.stepagin.dockins.core.project.exception.ProjectNotFoundException;
 import ru.stepagin.dockins.core.project.repository.ProjectInfoRepository;
 import ru.stepagin.dockins.core.project.repository.ProjectUserFavouriteRepository;
@@ -43,7 +43,7 @@ public class FavouriteServiceImpl implements UserDomainFavouriteServicePort, Pro
         Optional<ProjectUserFavouriteEntity> existing = favouriteRepository.findByUserAndProject(currentUser, projectToLike);
 
         if (existing.isPresent() && !existing.get().isDeleted()) {
-            return new FavouriteStatusResponseDto(FavouriteStatus.ALREADY_SET);
+            return new FavouriteStatusResponseDto(FavouriteStatus.ALREADY_SET.name());
         }
 
         if (existing.isPresent()) {
@@ -60,7 +60,7 @@ public class FavouriteServiceImpl implements UserDomainFavouriteServicePort, Pro
             favouriteRepository.save(newFavourite);
         }
 
-        return new FavouriteStatusResponseDto(FavouriteStatus.SUCCESSFULLY_SET);
+        return new FavouriteStatusResponseDto(FavouriteStatus.SUCCESSFULLY_SET.name());
     }
 
     @Override
@@ -74,14 +74,14 @@ public class FavouriteServiceImpl implements UserDomainFavouriteServicePort, Pro
         Optional<ProjectUserFavouriteEntity> existing = favouriteRepository.findByUserAndProject(currentUser, projectToLike);
 
         if (existing.isEmpty() || existing.get().isDeleted()) {
-            return new FavouriteStatusResponseDto(FavouriteStatus.ALREADY_RELEASED);
+            return new FavouriteStatusResponseDto(FavouriteStatus.ALREADY_RELEASED.name());
         }
 
         ProjectUserFavouriteEntity fav = existing.get();
         fav.markAsDeleted();
         favouriteRepository.save(fav);
 
-        return new FavouriteStatusResponseDto(FavouriteStatus.SUCCESSFULLY_RELEASED);
+        return new FavouriteStatusResponseDto(FavouriteStatus.SUCCESSFULLY_RELEASED.name());
     }
 
     @Override

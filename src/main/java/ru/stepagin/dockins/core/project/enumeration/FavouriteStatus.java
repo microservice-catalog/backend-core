@@ -1,4 +1,4 @@
-package ru.stepagin.dockins.api.v1.project.enumeration;
+package ru.stepagin.dockins.core.project.enumeration;
 
 public enum FavouriteStatus {
     SUCCESSFULLY_SET,
