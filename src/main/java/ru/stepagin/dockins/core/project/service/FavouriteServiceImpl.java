@@ -41,9 +41,12 @@ public class FavouriteServiceImpl implements UserDomainFavouriteServicePort, Pro
         ProjectInfoEntity projectToLike = projectRepository.findByUsernameAndProjectName(username, projectName)
                 .orElseThrow(ProjectNotFoundException::new);
 
+        if (projectToLike.isPrivate())
+            authService.belongToCurrentUserOrThrow(projectToLike);
+
         Optional<ProjectUserFavouriteEntity> existing = projectUserFavouriteRepository.findByUserAndProject(currentUser, projectToLike);
 
-        if (existing.isPresent() && !existing.get().isDeleted()) {
+        if (!(existing.isEmpty() || existing.get().isDeleted())) {
             return new FavouriteStatusResponseDto(FavouriteStatus.ALREADY_SET.name());
         }
 

@@ -17,7 +17,7 @@ public interface ProjectInfoRepository extends JpaRepository<ProjectInfoEntity, 
     @Query("""
             select (count(p) > 0) from ProjectInfoEntity p
             where p.authorAccount = :authorAccount and upper(p.projectName) = upper(:projectName)""")
-    boolean existsByAuthorAccountAndProjectName(
+    boolean existsByAuthorAccountAndProjectNameToCreate(
             @Param("authorAccount") AccountEntity authorAccount,
             @Param("projectName") String projectName
     );
@@ -25,7 +25,8 @@ public interface ProjectInfoRepository extends JpaRepository<ProjectInfoEntity, 
     @Query("""
             select p from ProjectInfoEntity p
             where upper(p.authorAccount.username) = upper(:username)
-            and upper(p.projectName) = upper(:projectName)""")
+            and upper(p.projectName) = upper(:projectName)
+            and p.deleted = false""")
     Optional<ProjectInfoEntity> findByUsernameAndProjectName(
             @Param("username") String username,
             @Param("projectName") String projectName

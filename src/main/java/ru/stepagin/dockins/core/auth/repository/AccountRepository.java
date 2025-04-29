@@ -19,7 +19,8 @@ public interface AccountRepository extends JpaRepository<AccountEntity, UUID> {
     Optional<AccountEntity> findByUsernameExactlyForRegistration(@Param("username") String username);
 
     // только для регистрации
-    Optional<AccountEntity> findByEmailForRegistration(String email);
+    @Query("select a from AccountEntity a where upper(a.email) = upper(:email)")
+    Optional<AccountEntity> findByEmailForRegistration(@Param("email") String email);
 
     @Query("""
             select a from AccountEntity a

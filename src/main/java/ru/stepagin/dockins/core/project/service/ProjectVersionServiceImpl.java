@@ -38,7 +38,10 @@ public class ProjectVersionServiceImpl implements ProjectDomainProjectVersionSer
             String projectName,
             @Valid ProjectVersionCreateRequestDto requestDto
     ) {
-        ProjectInfoEntity project = getProjectAndCheckAuthority(username, projectName);
+        ProjectInfoEntity project = projectRepository.findByUsernameAndProjectName(username, projectName)
+                .orElseThrow(ProjectNotFoundException::new);
+
+        authService.belongToCurrentUserOrThrow(project);
 
         boolean exists = projectVersionRepository.existsByProjectAndName(project, requestDto.getVersionName());
         if (exists) {
@@ -62,7 +65,7 @@ public class ProjectVersionServiceImpl implements ProjectDomainProjectVersionSer
         ProjectVersionEntity version = projectVersionRepository.findByProjectNameAndVersionName(username, projectName, versionName)
                 .orElseThrow(VersionNotFoundException::new);
 
-        if (version.isPrivate()) {
+        if (version.isPrivate() || version.getProject().isPrivate()) {
             authService.belongToCurrentUserOrThrow(version);
         }
 
@@ -82,6 +85,9 @@ public class ProjectVersionServiceImpl implements ProjectDomainProjectVersionSer
             version.setDockerCommand(dockerCommandService.generateDockerCommand(requestDto.getDockerHubLink()));
         }
 
+        if (requestDto.getIsDefault() != null && requestDto.getIsDefault())
+            version.getProject().setDefaultProjectVersion(version);
+
         version.goodFieldsOrThrow();
         projectVersionRepository.save(version);
 
@@ -93,6 +99,10 @@ public class ProjectVersionServiceImpl implements ProjectDomainProjectVersionSer
         ProjectVersionEntity version = projectRepository.findByUsernameAndProjectName(username, projectName)
                 .orElseThrow(VersionNotFoundException::new)
                 .getDefaultProjectVersion();
+        if (version.isPrivate())
+            log.warn("Аномалия: дефолтная версия проекта приватная.");
+        if (version.getProject().isPrivate())
+            authService.belongToCurrentUserOrThrow(version);
 
         return mapToVersionResponse(version);
     }
@@ -103,15 +113,6 @@ public class ProjectVersionServiceImpl implements ProjectDomainProjectVersionSer
         var version = getVersionOrThrowAndCheckAuthority(username, projectName, versionName);
         version.markAsDeleted();
         projectVersionRepository.save(version);
-    }
-
-    private ProjectInfoEntity getProjectAndCheckAuthority(String username, String projectName) {
-        ProjectInfoEntity project = projectRepository.findByUsernameAndProjectName(username, projectName)
-                .orElseThrow(ProjectNotFoundException::new);
-
-        authService.belongToCurrentUserOrThrow(project);
-
-        return project;
     }
 
     private ProjectVersionEntity getVersionOrThrowAndCheckAuthority(String username, String projectName, String versionName) {

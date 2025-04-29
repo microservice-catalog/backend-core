@@ -54,7 +54,7 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
     public ProjectFullResponseDto createProject(@Valid ProjectCreateRequestDto requestDto) {
         AccountEntity currentUser = authService.getCurrentUser();
 
-        boolean exists = projectRepository.existsByAuthorAccountAndProjectName(currentUser, requestDto.getProjectName());
+        boolean exists = projectRepository.existsByAuthorAccountAndProjectNameToCreate(currentUser, requestDto.getProjectName());
         if (exists) {
             throw new ProjectAlreadyExistsException("Проект с таким названием уже существует у пользователя.");
         }
@@ -115,6 +115,9 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
         ProjectInfoEntity entity = projectRepository.findByUsernameAndProjectName(username, projectName)
                 .orElseThrow(ProjectNotFoundException::new);
 
+        if (entity.isPrivate())
+            authService.belongToCurrentUserOrThrow(entity);
+
         return projectMapper.mapToFullDto(entity);
     }
 
@@ -149,6 +152,7 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
     }
 
     @Override
+    @Transactional
     public void deleteProject(String username, String projectName) {
         ProjectInfoEntity entity = projectRepository.findByUsernameAndProjectName(username, projectName)
                 .orElseThrow(ProjectNotFoundException::new);
