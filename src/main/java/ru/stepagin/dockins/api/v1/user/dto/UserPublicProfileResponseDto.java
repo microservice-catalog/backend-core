@@ -22,10 +22,10 @@ public class UserPublicProfileResponseDto {
 
     private List<PublicProjectShortResponseDto> publicProjects;
 
-    private int favouritesCount;
+    private long favouritesCount;
 
-    private int viewsCount;
+    private long viewsCount;
 
-    private int likesCount;
+    private long likesCount;
 
 }

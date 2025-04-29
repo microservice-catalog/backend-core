@@ -28,9 +28,10 @@ import java.util.stream.Collectors;
 public class FavouriteServiceImpl implements UserDomainFavouriteServicePort, ProjectDomainFavouriteServicePort {
 
     private final ProjectInfoRepository projectRepository;
-    private final ProjectUserFavouriteRepository favouriteRepository;
+    private final ProjectUserFavouriteRepository projectUserFavouriteRepository;
     private final AuthServiceImpl authService;
     private final AccountRepository accountRepository;
+    private final ProjectMapper projectMapper;
 
     @Override
     @Transactional
@@ -40,7 +41,7 @@ public class FavouriteServiceImpl implements UserDomainFavouriteServicePort, Pro
         ProjectInfoEntity projectToLike = projectRepository.findByUsernameAndProjectName(username, projectName)
                 .orElseThrow(ProjectNotFoundException::new);
 
-        Optional<ProjectUserFavouriteEntity> existing = favouriteRepository.findByUserAndProject(currentUser, projectToLike);
+        Optional<ProjectUserFavouriteEntity> existing = projectUserFavouriteRepository.findByUserAndProject(currentUser, projectToLike);
 
         if (existing.isPresent() && !existing.get().isDeleted()) {
             return new FavouriteStatusResponseDto(FavouriteStatus.ALREADY_SET.name());
@@ -49,7 +50,7 @@ public class FavouriteServiceImpl implements UserDomainFavouriteServicePort, Pro
         if (existing.isPresent()) {
             ProjectUserFavouriteEntity fav = existing.get();
             fav.setDeleted(false);
-            favouriteRepository.save(fav);
+            projectUserFavouriteRepository.save(fav);
         } else {
             ProjectUserFavouriteEntity newFavourite = ProjectUserFavouriteEntity.builder()
                     .user(currentUser)
@@ -57,7 +58,7 @@ public class FavouriteServiceImpl implements UserDomainFavouriteServicePort, Pro
                     .createdOn(java.time.LocalDateTime.now())
                     .deleted(false)
                     .build();
-            favouriteRepository.save(newFavourite);
+            projectUserFavouriteRepository.save(newFavourite);
         }
 
         return new FavouriteStatusResponseDto(FavouriteStatus.SUCCESSFULLY_SET.name());
@@ -71,7 +72,7 @@ public class FavouriteServiceImpl implements UserDomainFavouriteServicePort, Pro
         ProjectInfoEntity projectToLike = projectRepository.findByUsernameAndProjectName(username, projectName)
                 .orElseThrow(ProjectNotFoundException::new);
 
-        Optional<ProjectUserFavouriteEntity> existing = favouriteRepository.findByUserAndProject(currentUser, projectToLike);
+        Optional<ProjectUserFavouriteEntity> existing = projectUserFavouriteRepository.findByUserAndProject(currentUser, projectToLike);
 
         if (existing.isEmpty() || existing.get().isDeleted()) {
             return new FavouriteStatusResponseDto(FavouriteStatus.ALREADY_RELEASED.name());
@@ -79,20 +80,20 @@ public class FavouriteServiceImpl implements UserDomainFavouriteServicePort, Pro
 
         ProjectUserFavouriteEntity fav = existing.get();
         fav.markAsDeleted();
-        favouriteRepository.save(fav);
+        projectUserFavouriteRepository.save(fav);
 
         return new FavouriteStatusResponseDto(FavouriteStatus.SUCCESSFULLY_RELEASED.name());
     }
 
     @Override
     public List<PublicProjectShortResponseDto> getUserFavourites(String username) {
-        AccountEntity user = accountRepository.findByUsernameExactly(username)
+        AccountEntity user = accountRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new ProjectNotFoundException("Пользователь не найден."));
 
-        List<ProjectUserFavouriteEntity> favourites = favouriteRepository.findAllByUser(user);
+        List<ProjectUserFavouriteEntity> favourites = projectUserFavouriteRepository.findAllByUser(user);
 
         return favourites.stream()
-                .map(fav -> mapToShortDto(fav.getProject()))
+                .map(fav -> projectMapper.mapToShortDto(fav.getProject()))
                 .collect(Collectors.toList());
     }
 
@@ -100,22 +101,11 @@ public class FavouriteServiceImpl implements UserDomainFavouriteServicePort, Pro
     public List<PublicProjectShortResponseDto> getCurrentUserFavourites() {
         AccountEntity user = authService.getCurrentUser();
 
-        List<ProjectUserFavouriteEntity> favourites = favouriteRepository.findAllByUser(user);
+        List<ProjectUserFavouriteEntity> favourites = projectUserFavouriteRepository.findAllByUser(user);
 
         return favourites.stream()
-                .map(fav -> mapToShortDto(fav.getProject()))
+                .map(fav -> projectMapper.mapToShortDto(fav.getProject()))
                 .collect(Collectors.toList());
     }
 
-    private PublicProjectShortResponseDto mapToShortDto(ProjectInfoEntity entity) {
-        return PublicProjectShortResponseDto.builder()
-                .projectName(entity.getProjectName())
-                .title(entity.getTitle())
-                .authorUsername(entity.getAuthorAccount().getUsername())
-                .likesCount(0)
-                .downloadsCount(0)
-                .viewsCount(0)
-                .tags(List.of())
-                .build();
-    }
 }

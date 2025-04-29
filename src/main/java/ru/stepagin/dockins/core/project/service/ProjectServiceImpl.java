@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -14,6 +15,7 @@ import ru.stepagin.dockins.api.v1.project.dto.ProjectFullResponseDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectUpdateRequestDto;
 import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
 import ru.stepagin.dockins.api.v1.project.service.ProjectDomainProjectServicePort;
+import ru.stepagin.dockins.core.auth.repository.AccountRepository;
 import ru.stepagin.dockins.core.auth.service.AuthServiceImpl;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
 import ru.stepagin.dockins.core.project.entity.ProjectVersionEntity;
@@ -44,6 +46,8 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
     private final ProjectSearchService projectSearchService;
     private final TagService tagService;
     private final ProjectVersionRepository projectVersionRepository;
+    private final ProjectMapper projectMapper;
+    private final AccountRepository accountRepository;
 
     @Override
     @Transactional
@@ -80,13 +84,15 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
         projectVersionRepository.save(defaultVersion);
         projectRepository.save(projectEntity);
 
-        return mapToFullDto(projectEntity);
+        return projectMapper.mapToFullDto(projectEntity);
     }
 
     @Override
     public PageResponse<PublicProjectShortResponseDto> getProjects(String username, PageRequest pageRequest) {
+        if (!accountRepository.existsByUsername(username))
+            throw new UsernameNotFoundException("Не существует пользователя '" + username + "'.");
         Page<ProjectInfoEntity> page = projectRepository.findByAuthorAccountAndPrivateFalse(username, pageRequest);
-        return PageResponse.of(page.map(this::mapToShortDto));
+        return PageResponse.of(page.map(projectMapper::mapToShortDto));
     }
 
     @Override
@@ -101,7 +107,7 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
         else
             results = projectSearchService.searchProjects(query, tags, pageRequest);
 
-        return PageResponse.of(results.map(this::mapToShortDto));
+        return PageResponse.of(results.map(projectMapper::mapToShortDto));
     }
 
     @Override
@@ -109,7 +115,7 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
         ProjectInfoEntity entity = projectRepository.findByUsernameAndProjectName(username, projectName)
                 .orElseThrow(ProjectNotFoundException::new);
 
-        return mapToFullDto(entity);
+        return projectMapper.mapToFullDto(entity);
     }
 
     @Override
@@ -139,7 +145,7 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
 
         projectRepository.save(entity);
 
-        return mapToFullDto(entity);
+        return projectMapper.mapToFullDto(entity);
     }
 
     @Override
@@ -154,41 +160,4 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
         projectRepository.save(entity);
     }
 
-    private ProjectFullResponseDto mapToFullDto(ProjectInfoEntity entity) {
-        long likesCount = projectUserFavouriteRepository.countByProjectId(entity.getId());
-        long downloadsCount = projectUserPullRepository.countByProjectId(entity.getId());
-        long viewsCount = projectUserWatchRepository.countByProjectId(entity.getId());
-
-        return ProjectFullResponseDto.builder()
-                .projectName(entity.getProjectName())
-                .title(entity.getTitle())
-                .authorUsername(entity.getAuthorAccount().getUsername())
-                .description(entity.getDescription())
-                .tags(entity.getTagsAsString())
-                .dockerHubLink(entity.getDefaultProjectVersion().getLinkDockerhub())
-                .githubLink(entity.getDefaultProjectVersion().getLinkGithub())
-                .dockerCommand(dockerCommandService.generateDockerCommand(entity.getDefaultProjectVersion().getLinkDockerhub()))
-                .envParameters(List.of()) // todo
-                .likesCount(likesCount)
-                .downloadsCount(downloadsCount)
-                .viewsCount(viewsCount)
-                .createdOn(entity.getCreatedOn() != null ? entity.getCreatedOn().toString() : null)
-                .build();
-    }
-
-    private PublicProjectShortResponseDto mapToShortDto(ProjectInfoEntity entity) {
-        long likesCount = projectUserFavouriteRepository.countByProjectId(entity.getId());
-        long downloadsCount = projectUserPullRepository.countByProjectId(entity.getId());
-        long viewsCount = projectUserWatchRepository.countByProjectId(entity.getId());
-
-        return PublicProjectShortResponseDto.builder()
-                .projectName(entity.getProjectName())
-                .title(entity.getTitle())
-                .authorUsername(entity.getAuthorAccount().getUsername())
-                .likesCount(likesCount)
-                .downloadsCount(downloadsCount)
-                .viewsCount(viewsCount)
-                .tags(List.of())
-                .build();
-    }
 }

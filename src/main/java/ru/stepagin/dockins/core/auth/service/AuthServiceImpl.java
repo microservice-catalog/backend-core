@@ -55,7 +55,7 @@ public class AuthServiceImpl implements AuthDomainAuthServicePort {
         }
 
         // проверяем существование подтверждённой почты в системе
-        AccountEntity existingAccountWithThisEmail = accountRepository.findByEmail(requestDto.getEmail())
+        AccountEntity existingAccountWithThisEmail = accountRepository.findByEmailForRegistration(requestDto.getEmail())
                 .orElse(null);
         if (existingAccountWithThisEmail != null) {
 
@@ -70,7 +70,6 @@ public class AuthServiceImpl implements AuthDomainAuthServicePort {
                 return;
             }
             // email и username не совпадают -> удаляем старые аккаунты
-            // todo: удаление связанных объектов
             accountRepository.delete(existingAccountWithThisEmail);
         }
 
@@ -160,7 +159,7 @@ public class AuthServiceImpl implements AuthDomainAuthServicePort {
      */
     public AccountEntity getCurrentUser() {
         String username = getCurrentUsername();
-        return accountRepository.findByUsernameExactly(username)
+        return accountRepository.findByUsernameExactlyForRegistration(username)
                 .orElseThrow(() -> new IllegalStateException("Текущий пользователь не найден"));
     }
 
