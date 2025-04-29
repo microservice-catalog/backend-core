@@ -40,7 +40,7 @@ public class ProjectInfoEntity {
     @JoinColumn(name = "author_account_id")
     private AccountEntity authorAccount;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "default_project_version", nullable = false)
     private ProjectVersionEntity defaultProjectVersion;
 
