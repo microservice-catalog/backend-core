@@ -3,6 +3,7 @@ package ru.stepagin.dockins.core.user.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
+import ru.stepagin.dockins.core.auth.entity.EmailConfirmationEntity;
 import ru.stepagin.dockins.core.common.exception.BadUpdateDataException;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
 
@@ -62,6 +63,9 @@ public class AccountEntity {
 
     @Transient
     private List<ProjectInfoEntity> userProjects;
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<EmailConfirmationEntity> emailConfirmations;
 
     public void goodFieldsOrThrow() {
         if (fullName != null && fullName.trim().length() > 30)

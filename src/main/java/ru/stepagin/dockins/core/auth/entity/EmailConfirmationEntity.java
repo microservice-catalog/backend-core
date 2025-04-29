@@ -21,7 +21,7 @@ public class EmailConfirmationEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "account_id", nullable = false)
     private AccountEntity account;
 

@@ -19,8 +19,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import ru.stepagin.dockins.core.auth.AccountPrincipal;
 import ru.stepagin.dockins.core.auth.exception.TokenExpiredException;
 import ru.stepagin.dockins.core.auth.exception.TokenInvalidException;
+import ru.stepagin.dockins.core.auth.repository.AccountRepository;
 import ru.stepagin.dockins.core.user.entity.AccountEntity;
-import ru.stepagin.dockins.core.user.repository.AccountRepository;
 import ru.stepagin.dockins.security.util.TokenGenerator;
 
 import java.io.IOException;
@@ -46,9 +46,10 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         if (accessToken != null) {
             try {
                 Jws<Claims> claims = tokenGenerator.getParser().parseSignedClaims(accessToken);
-                String userId = claims.getPayload().getSubject();
+                UUID userId = UUID.fromString(claims.getPayload().getSubject());
+                String username = claims.getPayload().get("username", String.class);
 
-                AccountEntity account = accountRepository.findById(UUID.fromString(userId))
+                AccountEntity account = accountRepository.findById(userId)
                         .orElseThrow(() -> new TokenInvalidException("Пользователь не найден"));
 
                 AccountPrincipal principal = new AccountPrincipal(account);

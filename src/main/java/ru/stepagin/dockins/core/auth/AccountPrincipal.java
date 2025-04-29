@@ -7,13 +7,24 @@ import ru.stepagin.dockins.core.user.entity.AccountEntity;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.UUID;
 
 @Getter
 public class AccountPrincipal implements UserDetails {
     private final AccountEntity account;
+    private final UUID userId;
+    private final String username;
 
     public AccountPrincipal(AccountEntity account) {
         this.account = account;
+        this.userId = account.getId();
+        this.username = account.getUsername();
+    }
+
+    public AccountPrincipal(UUID userId, String username) {
+        this.account = null;
+        this.userId = userId;
+        this.username = username;
     }
 
     @Override

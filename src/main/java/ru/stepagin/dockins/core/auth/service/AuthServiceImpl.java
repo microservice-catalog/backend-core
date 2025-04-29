@@ -5,7 +5,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -14,17 +13,18 @@ import ru.stepagin.dockins.api.v1.auth.dto.LoginRequestDto;
 import ru.stepagin.dockins.api.v1.auth.dto.RegisterRequestDto;
 import ru.stepagin.dockins.api.v1.auth.service.AuthDomainAuthServicePort;
 import ru.stepagin.dockins.core.DomainErrorCodes;
+import ru.stepagin.dockins.core.auth.AccountPrincipal;
 import ru.stepagin.dockins.core.auth.exception.ActionNotAllowedException;
 import ru.stepagin.dockins.core.auth.exception.BadRegistrationDataException;
 import ru.stepagin.dockins.core.auth.exception.EmailAlreadyExistsException;
 import ru.stepagin.dockins.core.auth.exception.UsernameAlreadyExistsException;
+import ru.stepagin.dockins.core.auth.repository.AccountRepository;
 import ru.stepagin.dockins.core.common.exception.BadUpdateDataException;
 import ru.stepagin.dockins.core.external.dadata.DadataValidationService;
 import ru.stepagin.dockins.core.external.mail.EmailConfirmationService;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
 import ru.stepagin.dockins.core.project.entity.ProjectVersionEntity;
 import ru.stepagin.dockins.core.user.entity.AccountEntity;
-import ru.stepagin.dockins.core.user.repository.AccountRepository;
 import ru.stepagin.dockins.security.service.JwtService;
 
 @Slf4j
@@ -41,9 +41,44 @@ public class AuthServiceImpl implements AuthDomainAuthServicePort {
     @Transactional
     @Override
     public void register(@Valid RegisterRequestDto requestDto) {
+        // проверка правильности входных данных
         validateRegistrationData(requestDto);
-        var account = jwtService.registerNewAccount(requestDto);
-        emailConfirmationService.sendConfirmationEmail(account);
+        // находим пользователя с таким же username
+        var existingAccountWithThisUsername = accountRepository.findByUsernameIgnoreCase(requestDto.getUsername())
+                .orElse(null);
+        if (existingAccountWithThisUsername != null) {
+            // если пользователь с таким username уже подтвердил почту, то выбросить ошибку
+            if (existingAccountWithThisUsername.getEmailConfirmed())
+                throw new UsernameAlreadyExistsException();
+            // иначе освобождаем username - удаляем аккаунт
+            accountRepository.delete(existingAccountWithThisUsername);
+        }
+
+        // проверяем существование подтверждённой почты в системе
+        AccountEntity existingAccountWithThisEmail = accountRepository.findByEmail(requestDto.getEmail())
+                .orElse(null);
+        if (existingAccountWithThisEmail != null) {
+
+            // почта занята
+            if (existingAccountWithThisEmail.getEmailConfirmed())
+                throw new EmailAlreadyExistsException();
+
+            // почта не подтверждена, проверяем надо ли её удалить
+            if (existingAccountWithThisEmail.getUsername().equals(requestDto.getUsername())) {
+                // email и username совпадают -> значит это тот же аккаунт, отправляем письмо подтверждения повторно
+                emailConfirmationService.sendConfirmationEmail(existingAccountWithThisEmail);
+                return;
+            }
+            // email и username не совпадают -> удаляем старые аккаунты
+            // todo: удаление связанных объектов
+            accountRepository.delete(existingAccountWithThisEmail);
+        }
+
+        // username не занят, почта не занята, создаём аккаунт
+        AccountEntity newAccount = jwtService.registerNewAccount(requestDto);
+
+        // отправляем письмо
+        emailConfirmationService.sendConfirmationEmail(newAccount);
     }
 
     @Override
@@ -92,17 +127,11 @@ public class AuthServiceImpl implements AuthDomainAuthServicePort {
         if (!username.matches("^[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9]$")) {
             throw new BadRegistrationDataException("Имя пользователя может содержать только латинские буквы, цифры и знак дефис.", DomainErrorCodes.USERNAME_CONTAINS_BAD_SYMBOL);
         }
-        if (accountRepository.findByUsernameIgnoreCase(username).isPresent()) {
-            throw new UsernameAlreadyExistsException();
-        }
     }
 
     private void validateEmail(String email) {
         if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             throw new BadRegistrationDataException("Неверный формат email.", DomainErrorCodes.BAD_EMAIL);
-        }
-        if (accountRepository.findByEmail(email).isPresent()) {
-            throw new EmailAlreadyExistsException();
         }
     }
 
@@ -141,7 +170,7 @@ public class AuthServiceImpl implements AuthDomainAuthServicePort {
      * @return имя пользователя
      */
     private String getCurrentUsername() {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        AccountPrincipal userDetails = (AccountPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userDetails.getUsername();
     }
 

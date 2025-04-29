@@ -47,3 +47,8 @@ app:
     database-encryption-key: ${DOCKINS_DB_ENCRYPTION_KEY:postgrespostgres}
     jwt:
       signature-key: ${DOCKINS_JWT_SIGNATURE_KEY:jwtjwtjwtjwtjwtjwtjwtjwtjwtjwtjwtjwtjwtjwtjwtjwt}
+  messages:
+    mail:
+      enabled: ${DOCKINS_MAIL_ENABLED:true}
+      confirm:
+        enabled: ${DOCKINS_MAIL_CONFIRMATION_ENABLED:true}

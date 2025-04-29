@@ -2,6 +2,7 @@ package ru.stepagin.dockins.api.v1.auth.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -11,6 +12,7 @@ import ru.stepagin.dockins.core.auth.exception.*;
 
 @Slf4j
 @RestControllerAdvice
+@Order(1)
 public class AuthExceptionHandler {
 
     @ExceptionHandler({

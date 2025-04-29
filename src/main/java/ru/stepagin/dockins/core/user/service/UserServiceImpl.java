@@ -8,11 +8,11 @@ import org.springframework.stereotype.Service;
 import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
 import ru.stepagin.dockins.api.v1.user.dto.UserPublicProfileResponseDto;
 import ru.stepagin.dockins.api.v1.user.service.UserDomainUserServicePort;
+import ru.stepagin.dockins.core.auth.repository.AccountRepository;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
 import ru.stepagin.dockins.core.project.repository.ProjectInfoRepository;
 import ru.stepagin.dockins.core.user.entity.AccountEntity;
 import ru.stepagin.dockins.core.user.exception.UserNotFoundException;
-import ru.stepagin.dockins.core.user.repository.AccountRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -2,6 +2,8 @@ package ru.stepagin.dockins.core.external.mail;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.Scanner;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailConfirmationService {
@@ -24,6 +27,8 @@ public class EmailConfirmationService {
     private final EmailConfirmationRepository emailConfirmationRepository;
     private final EmailService emailService;
     private String confirmationTemplate;
+    @Value("${app.messages.mail.confirm.enabled}")
+    private boolean mailConfirmationEnabled;
 
     @PostConstruct
     public void init() throws IOException {
@@ -48,8 +53,13 @@ public class EmailConfirmationService {
                 .updatedOn(LocalDateTime.now())
                 .build();
         emailConfirmationRepository.save(confirmation);
-
-        sendEmail(account.getEmail(), code);
+        // todo при ошибке отправки сохранить ошибку в БД и повторить позже
+        if (mailConfirmationEnabled)
+            sendEmail(account.getEmail(), code);
+        else {
+            log.warn("MAIL CONFIRMATION DISABLED");
+            log.info("Confirmation code: {}", confirmation.getCode());
+        }
     }
 
     @Transactional

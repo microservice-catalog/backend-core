@@ -8,6 +8,7 @@ import ru.stepagin.dockins.api.v1.project.dto.FavouriteStatusResponseDto;
 import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
 import ru.stepagin.dockins.api.v1.project.service.ProjectDomainFavouriteServicePort;
 import ru.stepagin.dockins.api.v1.user.service.UserDomainFavouriteServicePort;
+import ru.stepagin.dockins.core.auth.repository.AccountRepository;
 import ru.stepagin.dockins.core.auth.service.AuthServiceImpl;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
 import ru.stepagin.dockins.core.project.entity.ProjectUserFavouriteEntity;
@@ -16,7 +17,6 @@ import ru.stepagin.dockins.core.project.exception.ProjectNotFoundException;
 import ru.stepagin.dockins.core.project.repository.ProjectInfoRepository;
 import ru.stepagin.dockins.core.project.repository.ProjectUserFavouriteRepository;
 import ru.stepagin.dockins.core.user.entity.AccountEntity;
-import ru.stepagin.dockins.core.user.repository.AccountRepository;
 
 import java.util.List;
 import java.util.Optional;

@@ -15,8 +15,8 @@ import ru.stepagin.dockins.core.auth.exception.AccountNotConfirmedException;
 import ru.stepagin.dockins.core.auth.exception.BadUsernameOrPasswordException;
 import ru.stepagin.dockins.core.auth.exception.TokenExpiredException;
 import ru.stepagin.dockins.core.auth.exception.TokenInvalidException;
+import ru.stepagin.dockins.core.auth.repository.AccountRepository;
 import ru.stepagin.dockins.core.user.entity.AccountEntity;
-import ru.stepagin.dockins.core.user.repository.AccountRepository;
 import ru.stepagin.dockins.security.util.RequestContextHolderUtil;
 import ru.stepagin.dockins.security.util.TokenGenerator;
 
