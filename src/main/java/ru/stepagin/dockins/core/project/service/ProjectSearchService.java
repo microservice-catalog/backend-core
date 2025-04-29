@@ -84,6 +84,11 @@ public class ProjectSearchService {
             predicates.add(tagEntity.get("name").in(tags));  // Фильтрация по тегам
         }
 
+
+        // Добавляем условия для проверки isDeleted и isPrivate
+        predicates.add(cb.equal(project.get("deleted"), false));
+        predicates.add(cb.equal(project.get("isPrivate"), false));
+
         return predicates;
     }
 }
