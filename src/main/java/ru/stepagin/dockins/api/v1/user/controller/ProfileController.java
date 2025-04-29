@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
 import ru.stepagin.dockins.api.v1.user.dto.ProfileResponseDto;
 import ru.stepagin.dockins.api.v1.user.dto.ProfileUpdateRequestDto;
-import ru.stepagin.dockins.core.project.service.FavouriteService;
-import ru.stepagin.dockins.core.user.service.ProfileService;
+import ru.stepagin.dockins.api.v1.user.service.UserDomainFavouriteServicePort;
+import ru.stepagin.dockins.api.v1.user.service.UserDomainProfileServicePort;
 
 import java.util.List;
 
@@ -18,8 +18,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProfileController {
 
-    private final ProfileService profileService;
-    private final FavouriteService favouriteService;
+    private final UserDomainProfileServicePort profileService;
+    private final UserDomainFavouriteServicePort favouriteService;
 
     @GetMapping
     public ResponseEntity<ProfileResponseDto> getCurrentProfile() {

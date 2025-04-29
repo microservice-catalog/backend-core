@@ -1,4 +1,4 @@
-package ru.stepagin.dockins.security;
+package ru.stepagin.dockins.security.service;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;

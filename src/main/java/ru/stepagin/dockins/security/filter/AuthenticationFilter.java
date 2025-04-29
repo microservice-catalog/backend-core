@@ -1,4 +1,4 @@
-package ru.stepagin.dockins.security;
+package ru.stepagin.dockins.security.filter;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -21,6 +21,7 @@ import ru.stepagin.dockins.core.auth.exception.TokenExpiredException;
 import ru.stepagin.dockins.core.auth.exception.TokenInvalidException;
 import ru.stepagin.dockins.core.user.entity.AccountEntity;
 import ru.stepagin.dockins.core.user.repository.AccountRepository;
+import ru.stepagin.dockins.security.util.TokenGenerator;
 
 import java.io.IOException;
 import java.util.Arrays;

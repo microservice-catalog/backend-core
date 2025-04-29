@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.stepagin.dockins.api.v1.project.dto.EnvParamCreateRequestDto;
 import ru.stepagin.dockins.api.v1.project.dto.EnvParamDto;
 import ru.stepagin.dockins.api.v1.project.dto.EnvParamUpdateRequestDto;
-import ru.stepagin.dockins.api.v1.project.service.ProjectEnvParamService;
-import ru.stepagin.dockins.core.auth.service.AuthService;
+import ru.stepagin.dockins.api.v1.project.service.ProjectDomainProjectEnvParamServicePort;
+import ru.stepagin.dockins.core.auth.service.AuthServiceImpl;
 import ru.stepagin.dockins.core.project.entity.ProjectEnvParamEntity;
 import ru.stepagin.dockins.core.project.entity.ProjectVersionEntity;
 import ru.stepagin.dockins.core.project.exception.EnvParamAlreadyExistsException;
@@ -23,11 +23,11 @@ import java.time.LocalDateTime;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ProjectEnvParamServiceImpl implements ProjectEnvParamService {
+public class ProjectEnvParamServiceImpl implements ProjectDomainProjectEnvParamServicePort {
 
     private final ProjectVersionRepository projectVersionRepository;
     private final ProjectEnvParamRepository projectEnvParamRepository;
-    private final AuthService authService;
+    private final AuthServiceImpl authService;
 
     private static EnvParamDto convertToDto(ProjectEnvParamEntity entity) {
         return EnvParamDto.builder()

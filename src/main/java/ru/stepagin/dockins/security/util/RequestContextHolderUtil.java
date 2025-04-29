@@ -1,4 +1,4 @@
-package ru.stepagin.dockins.security;
+package ru.stepagin.dockins.security.util;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;

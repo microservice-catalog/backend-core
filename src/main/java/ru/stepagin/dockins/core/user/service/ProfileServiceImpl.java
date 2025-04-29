@@ -11,7 +11,8 @@ import ru.stepagin.dockins.api.v1.project.dto.PrivateProjectShortResponseDto;
 import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
 import ru.stepagin.dockins.api.v1.user.dto.ProfileResponseDto;
 import ru.stepagin.dockins.api.v1.user.dto.ProfileUpdateRequestDto;
-import ru.stepagin.dockins.core.auth.service.AuthService;
+import ru.stepagin.dockins.api.v1.user.service.UserDomainProfileServicePort;
+import ru.stepagin.dockins.core.auth.service.AuthServiceImpl;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
 import ru.stepagin.dockins.core.project.repository.ProjectInfoRepository;
 import ru.stepagin.dockins.core.project.repository.ProjectUserFavouriteRepository;
@@ -25,13 +26,14 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ProfileService {
+public class ProfileServiceImpl implements UserDomainProfileServicePort {
 
-    private final AuthService authService;
+    private final AuthServiceImpl authService;
     private final ProjectInfoRepository projectInfoRepository;
     private final ProjectUserFavouriteRepository projectUserFavouriteRepository;
     private final ProjectUserWatchRepository projectUserWatchRepository;
 
+    @Override
     public ProfileResponseDto getCurrentProfile() {
         PageRequest pageRequest = PageRequest.of(0, 10);
         AccountEntity currentUser = authService.getCurrentUser();
@@ -56,6 +58,7 @@ public class ProfileService {
     }
 
     @Transactional
+    @Override
     public void updateCurrentProfile(@Valid ProfileUpdateRequestDto dto) {
         AccountEntity currentUser = authService.getCurrentUser();
 

@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.stepagin.dockins.api.v1.project.dto.FavouriteStatusResponseDto;
-import ru.stepagin.dockins.core.project.service.FavouriteService;
+import ru.stepagin.dockins.api.v1.project.service.ProjectDomainFavouriteServicePort;
 
 @Slf4j
 @RestController
@@ -13,7 +13,7 @@ import ru.stepagin.dockins.core.project.service.FavouriteService;
 @RequiredArgsConstructor
 public class FavouriteController {
 
-    private final FavouriteService favouriteService;
+    private final ProjectDomainFavouriteServicePort favouriteService;
 
     @PutMapping
     public ResponseEntity<FavouriteStatusResponseDto> addFavourite(
@@ -32,4 +32,5 @@ public class FavouriteController {
         FavouriteStatusResponseDto response = favouriteService.removeFavourite(username, projectName);
         return ResponseEntity.ok(response);
     }
+
 }

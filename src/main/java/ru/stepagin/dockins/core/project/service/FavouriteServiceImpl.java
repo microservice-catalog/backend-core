@@ -3,10 +3,13 @@ package ru.stepagin.dockins.core.project.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.stepagin.dockins.api.v1.project.dto.FavouriteStatusResponseDto;
 import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
 import ru.stepagin.dockins.api.v1.project.enumeration.FavouriteStatus;
-import ru.stepagin.dockins.core.auth.service.AuthService;
+import ru.stepagin.dockins.api.v1.project.service.ProjectDomainFavouriteServicePort;
+import ru.stepagin.dockins.api.v1.user.service.UserDomainFavouriteServicePort;
+import ru.stepagin.dockins.core.auth.service.AuthServiceImpl;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
 import ru.stepagin.dockins.core.project.entity.ProjectUserFavouriteEntity;
 import ru.stepagin.dockins.core.project.exception.ProjectNotFoundException;
@@ -22,13 +25,15 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class FavouriteService {
+public class FavouriteServiceImpl implements UserDomainFavouriteServicePort, ProjectDomainFavouriteServicePort {
 
     private final ProjectInfoRepository projectRepository;
     private final ProjectUserFavouriteRepository favouriteRepository;
-    private final AuthService authService;
+    private final AuthServiceImpl authService;
     private final AccountRepository accountRepository;
 
+    @Override
+    @Transactional
     public FavouriteStatusResponseDto addFavourite(String username, String projectName) {
         AccountEntity currentUser = authService.getCurrentUser();
 
@@ -58,6 +63,8 @@ public class FavouriteService {
         return new FavouriteStatusResponseDto(FavouriteStatus.SUCCESSFULLY_SET);
     }
 
+    @Override
+    @Transactional
     public FavouriteStatusResponseDto removeFavourite(String username, String projectName) {
         AccountEntity currentUser = authService.getCurrentUser();
 
@@ -77,6 +84,7 @@ public class FavouriteService {
         return new FavouriteStatusResponseDto(FavouriteStatus.SUCCESSFULLY_RELEASED);
     }
 
+    @Override
     public List<PublicProjectShortResponseDto> getUserFavourites(String username) {
         AccountEntity user = accountRepository.findByUsernameExactly(username)
                 .orElseThrow(() -> new ProjectNotFoundException("Пользователь не найден."));
@@ -88,6 +96,7 @@ public class FavouriteService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public List<PublicProjectShortResponseDto> getCurrentUserFavourites() {
         AccountEntity user = authService.getCurrentUser();
 

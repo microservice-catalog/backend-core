@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.stepagin.dockins.api.v1.project.dto.EnvParamCreateRequestDto;
 import ru.stepagin.dockins.api.v1.project.dto.EnvParamDto;
 import ru.stepagin.dockins.api.v1.project.dto.EnvParamUpdateRequestDto;
-import ru.stepagin.dockins.api.v1.project.service.ProjectEnvParamService;
+import ru.stepagin.dockins.api.v1.project.service.ProjectDomainProjectEnvParamServicePort;
 
 @Slf4j
 @RestController
@@ -15,7 +15,7 @@ import ru.stepagin.dockins.api.v1.project.service.ProjectEnvParamService;
 @RequiredArgsConstructor
 public class ProjectEnvParamController {
 
-    private final ProjectEnvParamService projectEnvParamService;
+    private final ProjectDomainProjectEnvParamServicePort projectEnvParamService;
 
     @PostMapping
     public ResponseEntity<EnvParamDto> addEnvParam(

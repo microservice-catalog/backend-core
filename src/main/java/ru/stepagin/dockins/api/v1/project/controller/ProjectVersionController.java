@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionCreateRequestDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionResponseDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionUpdateRequestDto;
-import ru.stepagin.dockins.api.v1.project.service.ProjectVersionService;
+import ru.stepagin.dockins.api.v1.project.service.ProjectDomainProjectVersionServicePort;
 
 @Slf4j
 @RestController
@@ -15,7 +15,7 @@ import ru.stepagin.dockins.api.v1.project.service.ProjectVersionService;
 @RequiredArgsConstructor
 public class ProjectVersionController {
 
-    private final ProjectVersionService projectVersionService;
+    private final ProjectDomainProjectVersionServicePort projectVersionService;
 
     @PostMapping
     public ResponseEntity<ProjectVersionResponseDto> createVersion(

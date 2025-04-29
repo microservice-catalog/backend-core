@@ -10,7 +10,7 @@ import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
 
 import java.util.List;
 
-public interface ProjectService {
+public interface ProjectDomainProjectServicePort {
 
     ProjectFullResponseDto createProject(@Valid ProjectCreateRequestDto requestDto);
 
@@ -23,4 +23,5 @@ public interface ProjectService {
     ProjectFullResponseDto updateProject(String username, String projectName, @Valid ProjectUpdateRequestDto requestDto);
 
     void deleteProject(String username, String projectName);
+
 }

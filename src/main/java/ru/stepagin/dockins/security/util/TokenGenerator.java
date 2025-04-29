@@ -1,4 +1,4 @@
-package ru.stepagin.dockins.security;
+package ru.stepagin.dockins.security.util;
 
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;

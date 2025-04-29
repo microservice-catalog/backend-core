@@ -5,7 +5,7 @@ import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionCreateRequestDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionResponseDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionUpdateRequestDto;
 
-public interface ProjectVersionService {
+public interface ProjectDomainProjectVersionServicePort {
 
     ProjectVersionResponseDto createVersion(String username, String projectName, @Valid ProjectVersionCreateRequestDto requestDto);
 
@@ -16,4 +16,5 @@ public interface ProjectVersionService {
     ProjectVersionResponseDto getDefaultProjectVersion(String username, String projectName);
 
     void deleteVersion(String username, String projectName, String versionName);
+
 }

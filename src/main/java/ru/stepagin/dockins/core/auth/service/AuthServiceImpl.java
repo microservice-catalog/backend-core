@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import ru.stepagin.dockins.api.v1.auth.dto.ConfirmEmailDto;
 import ru.stepagin.dockins.api.v1.auth.dto.LoginRequestDto;
 import ru.stepagin.dockins.api.v1.auth.dto.RegisterRequestDto;
+import ru.stepagin.dockins.api.v1.auth.service.AuthDomainAuthServicePort;
 import ru.stepagin.dockins.core.DomainErrorCodes;
 import ru.stepagin.dockins.core.auth.exception.ActionNotAllowedException;
 import ru.stepagin.dockins.core.auth.exception.BadRegistrationDataException;
@@ -24,13 +25,13 @@ import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
 import ru.stepagin.dockins.core.project.entity.ProjectVersionEntity;
 import ru.stepagin.dockins.core.user.entity.AccountEntity;
 import ru.stepagin.dockins.core.user.repository.AccountRepository;
-import ru.stepagin.dockins.security.JwtService;
+import ru.stepagin.dockins.security.service.JwtService;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Validated
-public class AuthService {
+public class AuthServiceImpl implements AuthDomainAuthServicePort {
 
     private final AccountRepository accountRepository;
     private final DadataValidationService dadataValidationService;
@@ -38,24 +39,29 @@ public class AuthService {
     private final EmailConfirmationService emailConfirmationService;
 
     @Transactional
+    @Override
     public void register(@Valid RegisterRequestDto requestDto) {
         validateRegistrationData(requestDto);
         var account = jwtService.registerNewAccount(requestDto);
         emailConfirmationService.sendConfirmationEmail(account);
     }
 
+    @Override
     public void confirmEmail(@Valid ConfirmEmailDto confirmEmailDto) {
         emailConfirmationService.confirmEmail(confirmEmailDto.getEmail(), confirmEmailDto.getCode());
     }
 
+    @Override
     public void login(@Valid LoginRequestDto loginRequestDto, HttpServletResponse response) {
         jwtService.login(loginRequestDto, response);
     }
 
+    @Override
     public void refreshTokens(HttpServletResponse response) {
         jwtService.refreshTokens(response);
     }
 
+    @Override
     public void logout(HttpServletResponse response) {
         jwtService.clearAuthCookies(response);
     }

@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
 import ru.stepagin.dockins.api.v1.user.dto.UserPublicProfileResponseDto;
+import ru.stepagin.dockins.api.v1.user.service.UserDomainUserServicePort;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
 import ru.stepagin.dockins.core.project.repository.ProjectInfoRepository;
 import ru.stepagin.dockins.core.user.entity.AccountEntity;
@@ -19,11 +20,12 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserServiceImpl implements UserDomainUserServicePort {
 
     private final AccountRepository accountRepository;
     private final ProjectInfoRepository projectRepository;
 
+    @Override
     public UserPublicProfileResponseDto getPublicProfile(String username, PageRequest pageRequest) {
         AccountEntity user = accountRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден."));

@@ -7,8 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
 import ru.stepagin.dockins.api.v1.user.dto.UserPublicProfileResponseDto;
-import ru.stepagin.dockins.core.project.service.FavouriteService;
-import ru.stepagin.dockins.core.user.service.UserService;
+import ru.stepagin.dockins.api.v1.user.service.UserDomainFavouriteServicePort;
+import ru.stepagin.dockins.api.v1.user.service.UserDomainUserServicePort;
 
 import java.util.List;
 
@@ -18,8 +18,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
-    private final FavouriteService favouriteService;
+    private final UserDomainUserServicePort userService;
+    private final UserDomainFavouriteServicePort favouriteService;
 
     @GetMapping("/{username}")
     public ResponseEntity<UserPublicProfileResponseDto> getPublicProfile(

@@ -1,4 +1,4 @@
-package ru.stepagin.dockins.security;
+package ru.stepagin.dockins.security.service;
 
 import io.jsonwebtoken.*;
 import jakarta.servlet.http.Cookie;
@@ -17,6 +17,8 @@ import ru.stepagin.dockins.core.auth.exception.TokenExpiredException;
 import ru.stepagin.dockins.core.auth.exception.TokenInvalidException;
 import ru.stepagin.dockins.core.user.entity.AccountEntity;
 import ru.stepagin.dockins.core.user.repository.AccountRepository;
+import ru.stepagin.dockins.security.util.RequestContextHolderUtil;
+import ru.stepagin.dockins.security.util.TokenGenerator;
 
 import java.util.Arrays;
 import java.util.Optional;

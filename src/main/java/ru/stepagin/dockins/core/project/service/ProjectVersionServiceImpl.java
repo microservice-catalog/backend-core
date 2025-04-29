@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionCreateRequestDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionResponseDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionUpdateRequestDto;
-import ru.stepagin.dockins.api.v1.project.service.ProjectVersionService;
-import ru.stepagin.dockins.core.auth.service.AuthService;
+import ru.stepagin.dockins.api.v1.project.service.ProjectDomainProjectVersionServicePort;
+import ru.stepagin.dockins.core.auth.service.AuthServiceImpl;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
 import ru.stepagin.dockins.core.project.entity.ProjectVersionEntity;
 import ru.stepagin.dockins.core.project.exception.ProjectNotFoundException;
@@ -24,11 +24,11 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ProjectVersionServiceImpl implements ProjectVersionService {
+public class ProjectVersionServiceImpl implements ProjectDomainProjectVersionServicePort {
 
     private final ProjectInfoRepository projectRepository;
     private final ProjectVersionRepository projectVersionRepository;
-    private final AuthService authService;
+    private final AuthServiceImpl authService;
     private final DockerCommandService dockerCommandService;
 
     @Override

@@ -10,7 +10,7 @@ import ru.stepagin.dockins.api.v1.project.dto.ProjectCreateRequestDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectFullResponseDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectUpdateRequestDto;
 import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
-import ru.stepagin.dockins.api.v1.project.service.ProjectService;
+import ru.stepagin.dockins.api.v1.project.service.ProjectDomainProjectServicePort;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProjectController {
 
-    private final ProjectService projectService;
+    private final ProjectDomainProjectServicePort projectService;
 
     @PostMapping
     public ResponseEntity<ProjectFullResponseDto> createProject(@RequestBody ProjectCreateRequestDto requestDto) {

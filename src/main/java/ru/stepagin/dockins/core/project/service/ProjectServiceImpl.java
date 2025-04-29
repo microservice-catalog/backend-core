@@ -13,8 +13,8 @@ import ru.stepagin.dockins.api.v1.project.dto.ProjectCreateRequestDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectFullResponseDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectUpdateRequestDto;
 import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
-import ru.stepagin.dockins.api.v1.project.service.ProjectService;
-import ru.stepagin.dockins.core.auth.service.AuthService;
+import ru.stepagin.dockins.api.v1.project.service.ProjectDomainProjectServicePort;
+import ru.stepagin.dockins.core.auth.service.AuthServiceImpl;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
 import ru.stepagin.dockins.core.project.entity.ProjectVersionEntity;
 import ru.stepagin.dockins.core.project.entity.TagEntity;
@@ -32,7 +32,7 @@ import java.util.List;
 @Service
 @Validated
 @RequiredArgsConstructor
-public class ProjectServiceImpl implements ProjectService {
+public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
 
     private final ProjectInfoRepository projectRepository;
     private final ProjectUserFavouriteRepository projectUserFavouriteRepository;
@@ -40,7 +40,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectUserWatchRepository projectUserWatchRepository;
     private final DockerCommandService dockerCommandService;
     private final MarkdownDescriptionService markdownDescriptionService;
-    private final AuthService authService;
+    private final AuthServiceImpl authService;
     private final ProjectSearchService projectSearchService;
     private final TagService tagService;
     private final ProjectVersionRepository projectVersionRepository;

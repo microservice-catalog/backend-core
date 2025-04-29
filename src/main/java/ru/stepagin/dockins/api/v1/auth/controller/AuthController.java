@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.stepagin.dockins.api.v1.auth.dto.ConfirmEmailDto;
 import ru.stepagin.dockins.api.v1.auth.dto.LoginRequestDto;
 import ru.stepagin.dockins.api.v1.auth.dto.RegisterRequestDto;
-import ru.stepagin.dockins.core.auth.service.AuthService;
+import ru.stepagin.dockins.api.v1.auth.service.AuthDomainAuthServicePort;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+    private final AuthDomainAuthServicePort authService;
 
     @PostMapping("/register")
     public void register(@RequestBody RegisterRequestDto requestDto) {
