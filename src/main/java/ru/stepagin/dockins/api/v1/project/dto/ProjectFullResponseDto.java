@@ -36,4 +36,7 @@ public class ProjectFullResponseDto {
     private long viewsCount;
 
     private String createdOn;
+
+    private boolean likedByMe;
+
 }

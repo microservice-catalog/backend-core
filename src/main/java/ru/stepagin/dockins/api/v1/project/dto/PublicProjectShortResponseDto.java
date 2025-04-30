@@ -24,4 +24,7 @@ public class PublicProjectShortResponseDto {
     private long viewsCount;
 
     private List<String> tags;
+
+    private boolean likedByMe;
+
 }

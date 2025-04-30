@@ -14,6 +14,7 @@ import ru.stepagin.dockins.core.project.repository.ProjectUserFavouriteRepositor
 import ru.stepagin.dockins.core.project.repository.ProjectUserPullRepository;
 import ru.stepagin.dockins.core.project.repository.ProjectUserWatchRepository;
 import ru.stepagin.dockins.core.project.service.helper.DockerCommandService;
+import ru.stepagin.dockins.core.user.entity.AccountEntity;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,38 +31,41 @@ public class ProjectMapper {
     private final ProjectEnvParamRepository envParamRepository;
     private final EnvMapper envMapper;
 
-    public PublicProjectShortResponseDto mapToShortDto(ProjectInfoEntity entity) {
-        long likesCount = projectUserFavouriteRepository.countByProjectId(entity.getId());
-        long downloadsCount = projectUserPullRepository.countByProjectId(entity.getId());
-        long viewsCount = projectUserWatchRepository.countByProjectId(entity.getId());
+    public PublicProjectShortResponseDto mapToShortDto(ProjectInfoEntity project, AccountEntity currentUser) {
+        long likesCount = projectUserFavouriteRepository.countByProjectId(project.getId());
+        long downloadsCount = projectUserPullRepository.countByProjectId(project.getId());
+        long viewsCount = projectUserWatchRepository.countByProjectId(project.getId());
+        boolean likedByMe = projectUserFavouriteRepository.existsByProjectAndUser(project, currentUser);
 
         return PublicProjectShortResponseDto.builder()
-                .projectName(entity.getProjectName())
-                .title(entity.getTitle())
-                .authorUsername(entity.getAuthorAccount().getUsername())
+                .projectName(project.getProjectName())
+                .title(project.getTitle())
+                .authorUsername(project.getAuthorAccount().getUsername())
                 .likesCount(likesCount)
+                .likedByMe(likedByMe)
                 .downloadsCount(downloadsCount)
                 .viewsCount(viewsCount)
-                .tags(entity.getTagsAsString())
+                .tags(project.getTagsAsString())
                 .build();
     }
 
-    public PrivateProjectShortResponseDto mapToShortDtoPrivate(ProjectInfoEntity entity) {
+    public PrivateProjectShortResponseDto mapToShortDtoPrivate(ProjectInfoEntity project) {
         return PrivateProjectShortResponseDto.builder()
-                .projectName(entity.getProjectName())
-                .title(entity.getTitle())
-                .authorUsername(entity.getAuthorAccount().getUsername())
-                .tags(entity.getTagsAsString())
+                .projectName(project.getProjectName())
+                .title(project.getTitle())
+                .authorUsername(project.getAuthorAccount().getUsername())
+                .tags(project.getTagsAsString())
                 .build();
     }
 
-    public ProjectFullResponseDto mapToFullDto(ProjectInfoEntity project) {
+    public ProjectFullResponseDto mapToFullDto(ProjectInfoEntity project, AccountEntity currentUser) {
         ProjectVersionEntity defaultVersion = project.getDefaultProjectVersion();
         long likesCount = projectUserFavouriteRepository.countByProjectId(project.getId());
         long downloadsCount = projectUserPullRepository.countByProjectId(project.getId());
         long viewsCount = projectUserWatchRepository.countByProjectId(project.getId());
 
         List<ProjectEnvParamEntity> envParams = envParamRepository.findByProjectVersion(defaultVersion);
+        boolean likedByMe = projectUserFavouriteRepository.existsByProjectAndUser(project, currentUser);
 
         return ProjectFullResponseDto.builder()
                 .projectName(project.getProjectName())
@@ -79,6 +83,7 @@ public class ProjectMapper {
                         .collect(Collectors.toList())
                 )
                 .likesCount(likesCount)
+                .likedByMe(likedByMe)
                 .downloadsCount(downloadsCount)
                 .viewsCount(viewsCount)
                 .createdOn(project.getCreatedOn() != null ? project.getCreatedOn().toString() : null)

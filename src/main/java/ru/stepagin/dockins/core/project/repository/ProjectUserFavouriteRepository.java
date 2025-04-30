@@ -55,5 +55,11 @@ public interface ProjectUserFavouriteRepository extends JpaRepository<ProjectUse
             @Param("project") ProjectInfoEntity project
     );
 
+    @Query("""
+            select (count(p) > 0) from ProjectUserFavouriteEntity p
+            where p.project = :project
+            and p.user = :user
+            and p.deleted = false""")
+    boolean existsByProjectAndUser(@Param("project") ProjectInfoEntity project, @Param("user") AccountEntity user);
 
 }

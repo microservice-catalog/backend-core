@@ -82,7 +82,7 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
         projectEntity.setDefaultProjectVersion(defaultVersion);
         projectRepository.save(projectEntity);
 
-        return projectMapper.mapToFullDto(projectEntity);
+        return projectMapper.mapToFullDto(projectEntity, currentUser);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
         if (!accountRepository.existsByUsername(username))
             throw new UsernameNotFoundException("Не существует пользователя '" + username + "'.");
         Page<ProjectInfoEntity> page = projectRepository.findByAuthorAccountAndPrivateFalse(username, pageRequest);
-        return PageResponse.of(page.map(projectMapper::mapToShortDto));
+        return PageResponse.of(page.map(p -> projectMapper.mapToShortDto(p, authService.getCurrentUser())));
     }
 
     @Override
@@ -105,7 +105,7 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
         else
             results = projectSearchService.searchProjects(query, tags, pageRequest);
 
-        return PageResponse.of(results.map(projectMapper::mapToShortDto));
+        return PageResponse.of(results.map(p -> projectMapper.mapToShortDto(p, authService.getCurrentUser())));
     }
 
     @Override
@@ -121,7 +121,7 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
             authService.belongToCurrentUserOrThrow(entity.getDefaultProjectVersion());
         }
 
-        return projectMapper.mapToFullDto(entity);
+        return projectMapper.mapToFullDto(entity, authService.getCurrentUser());
     }
 
     @Override
@@ -151,7 +151,7 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
 
         projectRepository.save(entity);
 
-        return projectMapper.mapToFullDto(entity);
+        return projectMapper.mapToFullDto(entity, authService.getCurrentUser());
     }
 
     @Override

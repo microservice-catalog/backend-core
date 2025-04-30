@@ -96,7 +96,7 @@ public class FavouriteServiceImpl implements UserDomainFavouriteServicePort, Pro
         List<ProjectUserFavouriteEntity> favourites = projectUserFavouriteRepository.findAllByUser(user);
 
         return favourites.stream()
-                .map(fav -> projectMapper.mapToShortDto(fav.getProject()))
+                .map(fav -> projectMapper.mapToShortDto(fav.getProject(), authService.getCurrentUser()))
                 .collect(Collectors.toList());
     }
 
@@ -107,7 +107,7 @@ public class FavouriteServiceImpl implements UserDomainFavouriteServicePort, Pro
         List<ProjectUserFavouriteEntity> favourites = projectUserFavouriteRepository.findAllByUser(user);
 
         return favourites.stream()
-                .map(fav -> projectMapper.mapToShortDto(fav.getProject()))
+                .map(fav -> projectMapper.mapToShortDto(fav.getProject(), user))
                 .collect(Collectors.toList());
     }
 

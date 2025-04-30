@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ru.stepagin.dockins.api.v1.user.dto.ProfileResponseDto;
 import ru.stepagin.dockins.api.v1.user.dto.UserPublicProfileResponseDto;
+import ru.stepagin.dockins.core.auth.service.AuthServiceImpl;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
 import ru.stepagin.dockins.core.project.repository.ProjectUserFavouriteRepository;
 import ru.stepagin.dockins.core.project.repository.ProjectUserWatchRepository;
@@ -24,8 +25,10 @@ public class ProfileMapper {
     private final ProjectMapper projectMapper;
     private final ProjectUserFavouriteRepository projectUserFavouriteRepository;
     private final ProjectUserWatchRepository projectUserWatchRepository;
+    private final AuthServiceImpl authServiceImpl;
 
     public UserPublicProfileResponseDto mapToDto(AccountEntity user, Page<ProjectInfoEntity> projects) {
+        var currentUser = authServiceImpl.getCurrentUser();
         List<UUID> publicProjectsIds = projects.map(ProjectInfoEntity::getId).toList();
         long favouritesCount = projectUserFavouriteRepository.countByAccountId(user.getId());
         long viewsCount = projectUserWatchRepository.countByAccountId(user.getId());
@@ -36,7 +39,7 @@ public class ProfileMapper {
                 .fullName(user.getFullName())
                 .description(user.getDescription())
                 .avatarUrl(user.getAvatarUrl())
-                .publicProjects(projects.stream().map(projectMapper::mapToShortDto).collect(Collectors.toList()))
+                .publicProjects(projects.stream().map(p -> projectMapper.mapToShortDto(p, currentUser)).collect(Collectors.toList()))
                 .favouritesCount(favouritesCount)
                 .viewsCount(viewsCount)
                 .likesCount(likesCount)
@@ -58,7 +61,9 @@ public class ProfileMapper {
                 .fullName(user.getFullName())
                 .description(user.getDescription())
                 .avatarUrl(user.getAvatarUrl())
-                .publicProjects(publicProjectsPage.stream().map(projectMapper::mapToShortDto).collect(Collectors.toList()))
+                .publicProjects(publicProjectsPage.stream()
+                        .map(p -> projectMapper.mapToShortDto(p, user))
+                        .collect(Collectors.toList()))
                 .privateProjects(privateProjectsPage.stream().map(projectMapper::mapToShortDtoPrivate).collect(Collectors.toList()))
                 .favouritesCount(favouritesCount)
                 .viewsCount(viewsCount)

@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Random;
 import java.util.Scanner;
 
 @Slf4j
@@ -95,10 +96,11 @@ public class EmailConfirmationService {
     }
 
     private String generateConfirmationCode() {
-//        Random random = new Random();
-//        int number = random.nextInt(900000) + 100000; // 6-значное число
-//        return String.valueOf(number);
-        return "000000";
+        if (!mailConfirmationEnabled)
+            return "000000";
+        Random random = new Random();
+        int number = random.nextInt(900000) + 100000; // 6-значное число
+        return String.valueOf(number);
     }
 }
 
