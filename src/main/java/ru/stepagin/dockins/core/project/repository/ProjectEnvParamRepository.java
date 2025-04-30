@@ -7,22 +7,24 @@ import org.springframework.stereotype.Repository;
 import ru.stepagin.dockins.core.project.entity.ProjectEnvParamEntity;
 import ru.stepagin.dockins.core.project.entity.ProjectVersionEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface ProjectEnvParamRepository extends JpaRepository<ProjectEnvParamEntity, Long> {
-    @Query("""
-            select (count(p) > 0) from ProjectEnvParamEntity p
-            where p.projectVersion = :projectVersion
-            and upper(p.name) = upper(:name)""")
-    boolean existsByProjectVersionAndName(@Param("projectVersion") ProjectVersionEntity projectVersion, @Param("name") String name);
 
     @Query("""
             select p from ProjectEnvParamEntity p
             where p.projectVersion = :projectVersion
-            and upper(p.name) = upper(:name)
+            and upper(p.name) = upper(:name)""")
+    Optional<ProjectEnvParamEntity> findByProjectVersionAndNameWithDeleted(@Param("projectVersion") ProjectVersionEntity projectVersion, @Param("name") String name);
+
+
+    @Query("""
+            select p from ProjectEnvParamEntity p
+            where p.projectVersion = :projectVersion
             and p.deleted = false""")
-    Optional<ProjectEnvParamEntity> findByProjectVersionAndName(@Param("projectVersion") ProjectVersionEntity projectVersion, @Param("name") String name);
+    List<ProjectEnvParamEntity> findByProjectVersion(@Param("projectVersion") ProjectVersionEntity projectVersion);
 
 
 }

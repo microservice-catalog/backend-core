@@ -28,49 +28,57 @@ public class ProjectEnvParamServiceImpl implements ProjectDomainProjectEnvParamS
     private final ProjectVersionRepository projectVersionRepository;
     private final ProjectEnvParamRepository projectEnvParamRepository;
     private final AuthServiceImpl authService;
-
-    private static EnvParamDto convertToDto(ProjectEnvParamEntity entity) {
-        return EnvParamDto.builder()
-                .name(entity.getName())
-                .required(entity.getRequired())
-                .defaultValue(entity.getDefaultValue())
-                .build();
-    }
+    private final EnvMapper envMapper;
 
     @Override
     @Transactional
-    public EnvParamDto addEnvParam(String projectName, String versionName, @Valid EnvParamCreateRequestDto dto) {
-        String username = authService.getCurrentUser().getUsername();
+    public EnvParamDto addEnvParam(String username, String projectName, String versionName, @Valid EnvParamCreateRequestDto dto) {
         ProjectVersionEntity version = findProjectVersion(username, projectName, versionName);
 
-        if (projectEnvParamRepository.existsByProjectVersionAndName(version, dto.getName())) {
-            // todo проверка на deleted=true
-            throw new EnvParamAlreadyExistsException("Переменная окружения с таким именем уже существует.");
+        authService.belongToCurrentUserOrThrow(version);
+
+        ProjectEnvParamEntity param = projectEnvParamRepository.findByProjectVersionAndNameWithDeleted(version, dto.getName())
+                .orElse(null);
+
+        if (param != null) {
+            if (!param.isDeleted()) {
+                throw new EnvParamAlreadyExistsException("Переменная окружения с таким именем уже существует.");
+            }
+            param.markAsRestored();
+            param.setRequired(dto.isRequired());
+            param.setDefaultValue(dto.getDefaultValue());
+        } else {
+            param = ProjectEnvParamEntity.builder()
+                    .projectVersion(version)
+                    .name(dto.getName())
+                    .required(dto.isRequired())
+                    .defaultValue(dto.getDefaultValue())
+                    .createdOn(LocalDateTime.now())
+                    .build();
         }
+        param.goodFieldsOrThrow();
+        log.info("Пользователь '{}' добавил параметр '{}' в версию '{}' проекта '{}'",
+                authService.getCurrentUser().getUsername(),
+                dto.getName(),
+                versionName,
+                version.getProject().getProjectName());
 
-        ProjectEnvParamEntity param = ProjectEnvParamEntity.builder()
-                .projectVersion(version)
-                .name(dto.getName())
-                .required(dto.getRequired())
-                .defaultValue(dto.getDefaultValue())
-                .createdOn(LocalDateTime.now())
-                .build();
-
-        log.info("Пользователь '{}' добавил параметр '{}' в версию '{}'", authService.getCurrentUser().getUsername(), dto.getName(), versionName);
-
-        return convertToDto(projectEnvParamRepository.save(param));
+        return envMapper.convertToDto(projectEnvParamRepository.save(param));
     }
 
     @Override
     @Transactional
     public EnvParamDto updateEnvParam(
+            String username,
             String projectName,
             String versionName,
             String paramName,
             @Valid EnvParamUpdateRequestDto dto
     ) {
-        String username = authService.getCurrentUser().getUsername();
-        ProjectEnvParamEntity param = findEnvParam(username, projectName, versionName, paramName);
+        ProjectVersionEntity projectVersion = findProjectVersion(username, projectName, versionName);
+        authService.belongToCurrentUserOrThrow(projectVersion);
+
+        ProjectEnvParamEntity param = findEnvParamOrThrow(username, projectName, versionName, paramName, true);
 
         if (dto.getRequired() != null) {
             param.setRequired(dto.getRequired());
@@ -83,14 +91,15 @@ public class ProjectEnvParamServiceImpl implements ProjectDomainProjectEnvParamS
 
         log.info("Пользователь '{}' обновил параметр '{}' в версии '{}'", authService.getCurrentUser().getUsername(), paramName, versionName);
 
-        return convertToDto(projectEnvParamRepository.save(param));
+        return envMapper.convertToDto(projectEnvParamRepository.save(param));
     }
 
     @Override
     @Transactional
-    public void deleteEnvParam(String projectName, String versionName, String paramName) {
-        String username = authService.getCurrentUser().getUsername();
-        ProjectEnvParamEntity param = findEnvParam(username, projectName, versionName, paramName);
+    public void deleteEnvParam(String username, String projectName, String versionName, String paramName) {
+        ProjectEnvParamEntity param = findEnvParamOrThrow(username, projectName, versionName, paramName, true);
+
+        authService.belongToCurrentUserOrThrow(param.getProjectVersion());
 
         param.markAsDeleted();
         projectEnvParamRepository.save(param);
@@ -104,10 +113,19 @@ public class ProjectEnvParamServiceImpl implements ProjectDomainProjectEnvParamS
                 .orElseThrow(() -> new VersionNotFoundException("Версия проекта не найдена."));
     }
 
-    private ProjectEnvParamEntity findEnvParam(String username, String projectName, String versionName, String paramName) {
+    private ProjectEnvParamEntity findEnvParamOrThrow(
+            String username,
+            String projectName,
+            String versionName,
+            String paramName,
+            boolean throwIfDeleted
+    ) {
         ProjectVersionEntity version = findProjectVersion(username, projectName, versionName);
-
-        return projectEnvParamRepository.findByProjectVersionAndName(version, paramName)
+        var param = projectEnvParamRepository.findByProjectVersionAndNameWithDeleted(version, paramName)
                 .orElseThrow(() -> new EnvParamNotFoundException("Параметр окружения не найден."));
+        if (throwIfDeleted && param.isDeleted()) {
+            throw new EnvParamNotFoundException("Параметр окружения не найден.");
+        }
+        return param;
     }
 }

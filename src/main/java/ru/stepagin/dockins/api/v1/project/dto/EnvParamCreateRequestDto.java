@@ -1,6 +1,7 @@
 package ru.stepagin.dockins.api.v1.project.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,9 +12,10 @@ import lombok.Setter;
 public class EnvParamCreateRequestDto {
 
     @NotBlank
+    @Pattern(regexp = "^[a-zA-Z0-9.-]+$")
     private String name;
 
-    private Boolean required;
+    private boolean required;
 
     private String defaultValue;
 }

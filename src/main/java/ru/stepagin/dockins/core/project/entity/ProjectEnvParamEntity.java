@@ -2,7 +2,7 @@ package ru.stepagin.dockins.core.project.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ru.stepagin.dockins.core.project.service.CustomEnvDataEncryptor;
+import ru.stepagin.dockins.core.common.exception.BadUpdateDataException;
 
 import java.time.LocalDateTime;
 
@@ -31,13 +31,15 @@ public class ProjectEnvParamEntity {
     )
     private ProjectVersionEntity projectVersion;
 
+    //    @Convert(converter = CustomEnvDataEncryptor.class)
     @Column(nullable = false)
     private String name;
 
+    @Builder.Default
     @Column(nullable = false)
-    private Boolean required;
+    private boolean required = false;
 
-    @Convert(converter = CustomEnvDataEncryptor.class)
+    //    @Convert(converter = CustomEnvDataEncryptor.class)
     private String defaultValue;
 
     @Builder.Default
@@ -59,8 +61,20 @@ public class ProjectEnvParamEntity {
         }
     }
 
+    public void goodFieldsOrThrow() {
+        if (this.name == null || this.name.isBlank())
+            throw new BadUpdateDataException("Название параметра не может быть пустым");
+
+        if (!this.name.matches("^[a-zA-Z0-9._-]+$"))
+            throw new BadUpdateDataException("Название параметра может содержать латинские буквы, цифры, дефис, нижнее подчёркивание и знак точки.");
+    }
+
     public void markAsDeleted() {
         this.setDeleted(true);
         this.setDeletedOn(LocalDateTime.now());
+    }
+
+    public void markAsRestored() {
+        this.deleted = false;
     }
 }

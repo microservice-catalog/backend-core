@@ -78,7 +78,7 @@ public class ProjectVersionEntity {
         return envParams.stream()
                 .sorted((a, b) -> {
                     // Сначала обязательные, потом необязательные
-                    int requiredCompare = Boolean.compare(!a.getRequired(), !b.getRequired());
+                    int requiredCompare = Boolean.compare(!a.isRequired(), !b.isRequired());
                     if (requiredCompare != 0) {
                         return requiredCompare;
                     }

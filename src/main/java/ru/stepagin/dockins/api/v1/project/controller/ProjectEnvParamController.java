@@ -23,7 +23,7 @@ public class ProjectEnvParamController {
             @PathVariable String projectName,
             @PathVariable String versionName,
             @RequestBody EnvParamCreateRequestDto requestDto) {
-        EnvParamDto responseDto = projectEnvParamService.addEnvParam(projectName, versionName, requestDto);
+        EnvParamDto responseDto = projectEnvParamService.addEnvParam(username, projectName, versionName, requestDto);
         return ResponseEntity.status(201).body(responseDto);
     }
 
@@ -34,7 +34,7 @@ public class ProjectEnvParamController {
             @PathVariable String versionName,
             @PathVariable String paramName,
             @RequestBody EnvParamUpdateRequestDto requestDto) {
-        EnvParamDto responseDto = projectEnvParamService.updateEnvParam(projectName, versionName, paramName, requestDto);
+        EnvParamDto responseDto = projectEnvParamService.updateEnvParam(username, projectName, versionName, paramName, requestDto);
         return ResponseEntity.ok(responseDto);
     }
 
@@ -44,7 +44,7 @@ public class ProjectEnvParamController {
             @PathVariable String projectName,
             @PathVariable String versionName,
             @PathVariable String paramName) {
-        projectEnvParamService.deleteEnvParam(projectName, versionName, paramName);
+        projectEnvParamService.deleteEnvParam(username, projectName, versionName, paramName);
         return ResponseEntity.noContent().build();
     }
 }
