@@ -65,7 +65,7 @@ public class JwtService {
         accountRepository.updateLastLogin(account.getId());
     }
 
-    public void refreshTokens(HttpServletResponse response) {
+    public String refreshTokens(HttpServletResponse response) {
         HttpServletRequest request = RequestContextHolderUtil.getRequest();
         String refreshToken = getCookieValue(request, "dockins_refresh_token")
                 .orElseThrow(() -> new TokenInvalidException("Отсутствует refresh_token"));
@@ -81,6 +81,7 @@ public class JwtService {
             String newRefreshToken = tokenGenerator.generateRefreshToken(account);
 
             cookieService.setAuthCookies(newAccessToken, newRefreshToken, response);
+            return newAccessToken;
         } catch (ExpiredJwtException e) {
             throw new TokenExpiredException("Refresh токен истёк");
         } catch (JwtException e) {

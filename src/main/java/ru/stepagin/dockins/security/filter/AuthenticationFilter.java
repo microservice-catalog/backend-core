@@ -41,42 +41,55 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
-        String accessToken = resolveAccessToken(request);
-
-        if (accessToken != null) {
-            try {
-                Jws<Claims> claims = tokenGenerator.getParser().parseSignedClaims(accessToken);
-                UUID userId = UUID.fromString(claims.getPayload().getSubject());
-                String username = claims.getPayload().get("username", String.class);
-
-                // todo убрать поиск в БД для access токена
-                AccountEntity account = accountRepository.findById(userId)
-                        .orElseThrow(() -> new TokenInvalidException("Пользователь не найден"));
-
-                AccountPrincipal principal = new AccountPrincipal(account);
-
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        principal, null, null
-                );
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-
-//            } catch (io.jsonwebtoken.ExpiredJwtException e) {
-//                throw new TokenExpiredException("Access токен истёк");
-//            } catch (JwtException e) {
-//                throw new TokenInvalidException("Access токен недействителен " + e.getMessage());
-            } catch (Exception e) {
-                try {
-                    jwtService.refreshTokens(response);
-                } catch (Exception ex) {
-                    jwtService.clearAuthCookies(response);
-                }
-            }
-        } else if (refreshTokenExists(request)) {
-            jwtService.refreshTokens(response);
-        }
+        if (!request.getRequestURI().endsWith("/api/v1/auth/refresh"))
+            handleAuthorizationInContext(request, response);
 
         filterChain.doFilter(request, response);
+    }
+
+    private void handleAuthorizationInContext(HttpServletRequest request, HttpServletResponse response) {
+        String accessToken = resolveAccessToken(request);
+        if (accessToken == null && refreshTokenExists(request)) {
+            refreshTokensOrClearCookies(request, response);
+            return;
+        }
+
+        try {
+            setAuthorizationInContext(request, accessToken);
+        } catch (Exception e) {
+            refreshTokensOrClearCookies(request, response);
+        }
+
+    }
+
+    private void setAuthorizationInContext(HttpServletRequest request, String accessToken) {
+        if (accessToken == null)
+            throw new TokenInvalidException("Access token is null.");
+
+        Jws<Claims> claims = tokenGenerator.getParser().parseSignedClaims(accessToken);
+        UUID userId = UUID.fromString(claims.getPayload().getSubject());
+        String username = claims.getPayload().get("username", String.class);
+
+        // todo убрать поиск в БД для access токена
+        AccountEntity account = accountRepository.findById(userId)
+                .orElseThrow(() -> new TokenInvalidException("Пользователь не найден"));
+
+        AccountPrincipal principal = new AccountPrincipal(account);
+
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                principal, null, null
+        );
+        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    }
+
+    private void refreshTokensOrClearCookies(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            String newAccessToken = jwtService.refreshTokens(response);
+            setAuthorizationInContext(request, newAccessToken);
+        } catch (Exception ex) {
+            jwtService.clearAuthCookies(response);
+        }
     }
 
     private String resolveAccessToken(HttpServletRequest request) {
