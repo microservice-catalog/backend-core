@@ -26,6 +26,7 @@ public class TagService {
 
         List<String> normalizedNames = tagNames.stream()
                 .map(this::normalizeTag)
+                .filter(s -> !s.isEmpty())
                 .collect(Collectors.toList());
 
         List<TagEntity> existingTags = tagRepository.findAllByNameIn(normalizedNames);
