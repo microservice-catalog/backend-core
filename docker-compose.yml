@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Сервис для базы данных PostgreSQL
+  dockins-db:
+    image: postgres:17.4
+    container_name: dockins-db
+    environment:
+      POSTGRES_USER: ${DOCKINS_DB_USERNAME}
+      POSTGRES_PASSWORD: ${DOCKINS_DB_PASSWORD}
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - dockins-network
+    ports:
+      - "5432:5432"
+
+  # Сервис для вашего приложения Spring Boot
+  dockins-core:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spring-boot-app
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SERVER_PORT: 8080
+      DOCKINS_DB_URL: jdbc:postgresql://dockins-db:5432/postgres
+      DOCKINS_DB_USERNAME: ${DOCKINS_DB_USERNAME}
+      DOCKINS_DB_PASSWORD: ${DOCKINS_DB_PASSWORD}
+      DOCKINS_MAIL_HOST: ${DOCKINS_MAIL_HOST}
+      DOCKINS_MAIL_PORT: ${DOCKINS_MAIL_PORT}
+      DOCKINS_MAIL_USERNAME: ${DOCKINS_MAIL_USERNAME}
+      DOCKINS_MAIL_PASSWORD: ${DOCKINS_MAIL_PASSWORD}
+      DOCKINS_MAIL_ENABLED: true
+      DOCKINS_MAIL_CONFIRMATION_ENABLED: false
+    ports:
+      - "8080:8080"
+    depends_on:
+      - dockins-db
+    networks:
+      - dockins-network
+
+networks:
+  dockins-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local
