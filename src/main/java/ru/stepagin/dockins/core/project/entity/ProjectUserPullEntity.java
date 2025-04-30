@@ -19,11 +19,11 @@ public class ProjectUserPullEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_project_user_pull_user"))
     private AccountEntity user;
 
     @ManyToOne
-    @JoinColumn(name = "project_id")
+    @JoinColumn(name = "project_id", foreignKey = @ForeignKey(name = "fk_project_user_pull_project"))
     private ProjectInfoEntity project;
 
     @Builder.Default

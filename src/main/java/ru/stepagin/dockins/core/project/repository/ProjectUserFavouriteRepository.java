@@ -1,6 +1,5 @@
 package ru.stepagin.dockins.core.project.repository;
 
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,7 +19,7 @@ public interface ProjectUserFavouriteRepository extends JpaRepository<ProjectUse
             select count(p) from ProjectUserFavouriteEntity p
             where p.project.id = :id
             and p.deleted = false""")
-    @Cacheable(value = "projectStatsCache", key = "#projectId + '_favouritesCount'", unless = "#result == null")
+//    @Cacheable(value = "projectStatsCache", key = "#projectId + '_favouritesCount'", unless = "#result == null")
     long countByProjectId(@Param("id") UUID id);
 
     @Query("""
@@ -36,7 +35,7 @@ public interface ProjectUserFavouriteRepository extends JpaRepository<ProjectUse
             where p.project.id in :ids
             and p.project.isPrivate = false
             and p.deleted = false""")
-    @Cacheable(value = "projectUserStatsCache", key = "#userId + '_likesCount'", unless = "#result == null")
+//    @Cacheable(value = "projectUserStatsCache", key = "#userId + '_likesCount'", unless = "#result == null")
     long countByProjectIdIn(@Param("ids") Collection<UUID> ids);
 
     @Query("""

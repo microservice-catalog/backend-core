@@ -22,7 +22,9 @@ public class EmailConfirmationEntity {
     private Long id;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "account_id", nullable = false)
+    @JoinColumn(name = "account_id", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_email_confirmation_account_id")
+    )
     private AccountEntity account;
 
     @Column(nullable = false)

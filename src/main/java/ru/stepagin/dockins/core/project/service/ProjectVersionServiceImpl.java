@@ -6,10 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionCreateRequestDto;
+import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionListResponseDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionResponseDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionUpdateRequestDto;
 import ru.stepagin.dockins.api.v1.project.service.ProjectDomainProjectVersionServicePort;
+import ru.stepagin.dockins.core.auth.exception.ActionNotAllowedException;
 import ru.stepagin.dockins.core.auth.service.AuthServiceImpl;
+import ru.stepagin.dockins.core.common.exception.BadUpdateDataException;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
 import ru.stepagin.dockins.core.project.entity.ProjectVersionEntity;
 import ru.stepagin.dockins.core.project.exception.ProjectNotFoundException;
@@ -30,6 +33,7 @@ public class ProjectVersionServiceImpl implements ProjectDomainProjectVersionSer
     private final ProjectVersionRepository projectVersionRepository;
     private final AuthServiceImpl authService;
     private final DockerCommandService dockerCommandService;
+    private final VersionMapper versionMapper;
 
     @Override
     @Transactional
@@ -57,7 +61,7 @@ public class ProjectVersionServiceImpl implements ProjectDomainProjectVersionSer
 
         projectVersionRepository.save(version);
 
-        return mapToVersionResponse(version);
+        return versionMapper.mapToVersionResponse(version);
     }
 
     @Override
@@ -69,13 +73,22 @@ public class ProjectVersionServiceImpl implements ProjectDomainProjectVersionSer
             authService.belongToCurrentUserOrThrow(version);
         }
 
-        return mapToVersionResponse(version);
+        return versionMapper.mapToVersionResponse(version);
     }
 
     @Override
     @Transactional
-    public ProjectVersionResponseDto updateVersion(String username, String projectName, String versionName, ProjectVersionUpdateRequestDto requestDto) {
+    public ProjectVersionResponseDto updateVersion(
+            String username,
+            String projectName,
+            String versionName,
+            @Valid ProjectVersionUpdateRequestDto requestDto
+    ) {
         ProjectVersionEntity version = getVersionOrThrowAndCheckAuthority(username, projectName, versionName);
+        if (Boolean.TRUE.equals(requestDto.getIsPrivate())) {
+            if (Boolean.TRUE.equals(requestDto.getMakeVersionDefault()) || version.isDefault())
+                throw new BadUpdateDataException("Версия по умолчанию не может быть приватной.");
+        }
 
         if (requestDto.getName() != null) version.setName(requestDto.getName());
         if (requestDto.getIsPrivate() != null) version.setPrivate(requestDto.getIsPrivate());
@@ -85,32 +98,33 @@ public class ProjectVersionServiceImpl implements ProjectDomainProjectVersionSer
             version.setDockerCommand(dockerCommandService.generateDockerCommand(requestDto.getDockerHubLink()));
         }
 
-        if (requestDto.getIsDefault() != null && requestDto.getIsDefault())
-            version.getProject().setDefaultProjectVersion(version);
+        if (Boolean.TRUE.equals(requestDto.getMakeVersionDefault()))
+            version.makeDefault();
 
         version.goodFieldsOrThrow();
         projectVersionRepository.save(version);
 
-        return mapToVersionResponse(version);
+        return versionMapper.mapToVersionResponse(version);
     }
 
     @Override
-    public ProjectVersionResponseDto getDefaultProjectVersion(String username, String projectName) {
-        ProjectVersionEntity version = projectRepository.findByUsernameAndProjectName(username, projectName)
-                .orElseThrow(VersionNotFoundException::new)
-                .getDefaultProjectVersion();
-        if (version.isPrivate())
-            log.warn("Аномалия: дефолтная версия проекта приватная.");
-        if (version.getProject().isPrivate())
-            authService.belongToCurrentUserOrThrow(version);
-
-        return mapToVersionResponse(version);
+    public ProjectVersionListResponseDto getAllProjectVersions(String username, String projectName) {
+        ProjectInfoEntity project = projectRepository.findByUsernameAndProjectName(username, projectName)
+                .orElseThrow(ProjectNotFoundException::new);
+        try {
+            authService.belongToCurrentUserOrThrow(project);
+            return versionMapper.mapToVersionListResponseWithPrivate(project);
+        } catch (ActionNotAllowedException e) {
+            return versionMapper.mapToVersionListResponse(project);
+        }
     }
 
     @Override
     @Transactional
     public void deleteVersion(String username, String projectName, String versionName) {
         var version = getVersionOrThrowAndCheckAuthority(username, projectName, versionName);
+        if (version.isDefault())
+            throw new BadUpdateDataException("Невозможно удалить версию по умолчанию.");
         version.markAsDeleted();
         projectVersionRepository.save(version);
     }

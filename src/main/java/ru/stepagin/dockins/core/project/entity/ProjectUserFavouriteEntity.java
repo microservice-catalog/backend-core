@@ -19,11 +19,11 @@ public class ProjectUserFavouriteEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_project_user_favourite_user"))
     private AccountEntity user;
 
     @ManyToOne
-    @JoinColumn(name = "project_id")
+    @JoinColumn(name = "project_id", foreignKey = @ForeignKey(name = "fk_project_user_favourite_project"))
     private ProjectInfoEntity project;
 
     @Builder.Default

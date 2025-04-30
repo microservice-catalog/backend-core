@@ -16,10 +16,10 @@ public class ProjectTagEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "project_id")
+    @JoinColumn(name = "project_id", foreignKey = @ForeignKey(name = "fk_project_tag_project"))
     private ProjectInfoEntity project;
 
     @ManyToOne
-    @JoinColumn(name = "tag_id")
+    @JoinColumn(name = "tag_id", foreignKey = @ForeignKey(name = "fk_project_tag_tag"))
     private TagEntity tag;
 }

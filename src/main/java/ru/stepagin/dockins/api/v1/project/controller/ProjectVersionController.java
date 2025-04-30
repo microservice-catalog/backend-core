@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionCreateRequestDto;
+import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionListResponseDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionResponseDto;
 import ru.stepagin.dockins.api.v1.project.dto.ProjectVersionUpdateRequestDto;
 import ru.stepagin.dockins.api.v1.project.service.ProjectDomainProjectVersionServicePort;
@@ -27,10 +28,10 @@ public class ProjectVersionController {
     }
 
     @GetMapping
-    public ResponseEntity<ProjectVersionResponseDto> getDefaultVersion(
+    public ResponseEntity<ProjectVersionListResponseDto> getAllProjectVersions(
             @PathVariable String username,
             @PathVariable String projectName) {
-        ProjectVersionResponseDto responseDto = projectVersionService.getDefaultProjectVersion(username, projectName);
+        ProjectVersionListResponseDto responseDto = projectVersionService.getAllProjectVersions(username, projectName);
         return ResponseEntity.ok(responseDto);
     }
 

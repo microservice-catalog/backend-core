@@ -26,7 +26,9 @@ public class ProjectVersionEntity {
     private UUID id;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "project_id")
+    @JoinColumn(name = "project_id",
+            foreignKey = @ForeignKey(name = "fk_project_version_project_id")
+    )
     private ProjectInfoEntity project;
 
     @Column(nullable = false)
@@ -54,13 +56,18 @@ public class ProjectVersionEntity {
     @Version
     private Long version;
 
+    @Transient
+    private List<ProjectEnvParamEntity> envParams;
+
+    public ProjectVersionEntity(ProjectInfoEntity project, String name) {
+        this.project = project;
+        this.name = name;
+    }
+
     public void markAsDeleted() {
         this.deleted = true;
         this.deletedOn = LocalDateTime.now();
     }
-
-    @Transient
-    private List<ProjectEnvParamEntity> envParams;
 
     @Transient
     public String getEnvFileContent() {
@@ -83,7 +90,22 @@ public class ProjectVersionEntity {
     }
 
     public void goodFieldsOrThrow() {
-        if (!this.name.matches("^[a-zA-Z0-9-.]$"))
+        if (this.name == null || this.name.isBlank())
+            throw new BadUpdateDataException("Название версии не может быть пустым");
+
+        if (!this.name.matches("^[a-zA-Z0-9.-]+$"))
             throw new BadUpdateDataException("Название версии может содержать латинские буквы, цифры, дефис и знак точки.");
+    }
+
+    public boolean isDefault() {
+        if (this.project == null)
+            return false;
+        if (this.project.getDefaultProjectVersion() == null)
+            return false;
+        return this.getProject().getDefaultProjectVersion().getId().equals(this.getId());
+    }
+
+    public void makeDefault() {
+        project.setDefaultProjectVersion(this);
     }
 }

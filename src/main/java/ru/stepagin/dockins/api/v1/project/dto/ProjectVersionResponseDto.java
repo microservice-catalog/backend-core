@@ -20,4 +20,7 @@ public class ProjectVersionResponseDto {
     private String dockerCommand;
 
     private List<EnvParamDto> envParameters;
+
+    private boolean isPrivate;
+
 }

@@ -26,7 +26,9 @@ public class ProjectEnvParamEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "project_version_id")
+    @JoinColumn(name = "project_version_id",
+            foreignKey = @ForeignKey(name = "fk_project_env_param_project_version")
+    )
     private ProjectVersionEntity projectVersion;
 
     @Column(nullable = false)

@@ -46,6 +46,7 @@ public class DomainErrorCodes {
     public static final int PROJECT_NAME_STARTS_WITH_BAD_SYMBOL = 5105;
     public static final int PROJECT_NAME_ENDS_WITH_BAD_SYMBOL = 5106;
     public static final int PROJECT_NAME_CONTAINS_BAD_SYMBOL = 5107;
+    public static final int PROJECT_DESCRIPTION_IS_TOO_LONG = 5108;
 
     // Ошибки версий проектов
     public static final int VERSION_NOT_FOUND = 5200; // Версия не найдена

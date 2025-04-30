@@ -60,6 +60,7 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
         }
 
         ProjectInfoEntity projectEntity = new ProjectInfoEntity();
+        projectEntity.setDefaultProjectVersion(null);
         projectEntity.setAuthorAccount(currentUser);
         projectEntity.setProjectName(requestDto.getProjectName().trim());
         projectEntity.setTitle(requestDto.getTitle().trim());
@@ -68,20 +69,17 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
         List<TagEntity> tags = tagService.findOrCreateTags(requestDto.getTags());
         projectEntity.setTags(tags);
 
-        projectEntity.setCreatedOn(java.time.LocalDateTime.now());
+        projectEntity.goodFieldsOrThrow();
+        projectRepository.save(projectEntity);
 
-        ProjectVersionEntity defaultVersion = new ProjectVersionEntity();
-        defaultVersion.setName("default");
-        defaultVersion.setProject(projectEntity);
+        ProjectVersionEntity defaultVersion = new ProjectVersionEntity(projectEntity, "default");
         defaultVersion.setLinkGithub(requestDto.getGithubLink());
         defaultVersion.setLinkDockerhub(requestDto.getDockerHubLink());
         defaultVersion.setDockerCommand(dockerCommandService.generateDockerCommand(requestDto.getDockerHubLink()));
 
-        projectEntity.setDefaultProjectVersion(defaultVersion);
-
-        projectEntity.goodFieldsOrThrow();
-
         projectVersionRepository.save(defaultVersion);
+
+        projectEntity.setDefaultProjectVersion(defaultVersion);
         projectRepository.save(projectEntity);
 
         return projectMapper.mapToFullDto(projectEntity);
@@ -117,6 +115,11 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
 
         if (entity.isPrivate())
             authService.belongToCurrentUserOrThrow(entity);
+
+        if (entity.getDefaultProjectVersion().isPrivate()) {
+            log.warn("Аномалия: дефолтная версия проекта приватная.");
+            authService.belongToCurrentUserOrThrow(entity.getDefaultProjectVersion());
+        }
 
         return projectMapper.mapToFullDto(entity);
     }

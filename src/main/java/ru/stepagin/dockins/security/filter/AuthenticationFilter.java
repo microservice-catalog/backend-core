@@ -49,6 +49,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                 UUID userId = UUID.fromString(claims.getPayload().getSubject());
                 String username = claims.getPayload().get("username", String.class);
 
+                // todo убрать поиск в БД для access токена
                 AccountEntity account = accountRepository.findById(userId)
                         .orElseThrow(() -> new TokenInvalidException("Пользователь не найден"));
 
@@ -71,6 +72,8 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                     jwtService.clearAuthCookies(response);
                 }
             }
+        } else if (refreshTokenExists(request)) {
+            jwtService.refreshTokens(response);
         }
 
         filterChain.doFilter(request, response);
@@ -89,5 +92,15 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             return cookie.map(Cookie::getValue).orElse(null);
         }
         return null;
+    }
+
+    private boolean refreshTokenExists(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            Optional<Cookie> cookie = Arrays.stream(request.getCookies())
+                    .filter(c -> "dockins_refresh_token".equals(c.getName()))
+                    .findFirst();
+            return cookie.isPresent();
+        }
+        return false;
     }
 }

@@ -2,6 +2,7 @@ package ru.stepagin.dockins.core.project.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.Length;
 import org.hibernate.annotations.GenericGenerator;
 import ru.stepagin.dockins.core.DomainErrorCodes;
 import ru.stepagin.dockins.core.project.exception.ProjectConstraintViolationException;
@@ -37,15 +38,21 @@ public class ProjectInfoEntity {
     private String projectName;
 
     @ManyToOne
-    @JoinColumn(name = "author_account_id")
+    @JoinColumn(name = "author_account_id",
+            foreignKey = @ForeignKey(name = "fk_project_info_author_account_id")
+    )
     private AccountEntity authorAccount;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "default_project_version", nullable = false)
+    @JoinColumn(name = "default_project_version",
+            foreignKey = @ForeignKey(name = "fk_project_info_default_project_version")
+    )
     private ProjectVersionEntity defaultProjectVersion;
 
     private String title;
 
+    @Basic(fetch = FetchType.LAZY)
+    @Column(nullable = false, length = Length.LOB_DEFAULT)
     private String description;
 
     @Builder.Default
@@ -93,6 +100,8 @@ public class ProjectInfoEntity {
             throw new ProjectConstraintViolationException("Название проекта должно быть от 5 до 50 символов.", DomainErrorCodes.PROJECT_NAME_IS_TOO_SHORT);
         if (projectName.length() > 50)
             throw new ProjectConstraintViolationException("Название проекта должно быть от 5 до 50 символов.", DomainErrorCodes.PROJECT_NAME_IS_TOO_LONG);
+        if (description.length() > 100_000)
+            throw new ProjectConstraintViolationException("Описание проекта должно быть менее 100 000 символов.", DomainErrorCodes.PROJECT_DESCRIPTION_IS_TOO_LONG);
 
         if (!projectName.matches("^[a-zA-Z].*$"))
             throw new ProjectConstraintViolationException("Название проекта должно начинаться с латинской буквы.", DomainErrorCodes.PROJECT_NAME_STARTS_WITH_BAD_SYMBOL);

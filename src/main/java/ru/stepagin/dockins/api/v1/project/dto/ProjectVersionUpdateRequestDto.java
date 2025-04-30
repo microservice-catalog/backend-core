@@ -17,6 +17,6 @@ public class ProjectVersionUpdateRequestDto {
 
     private Boolean isPrivate;
 
-    private Boolean isDefault;
+    private Boolean makeVersionDefault;
 
 }
