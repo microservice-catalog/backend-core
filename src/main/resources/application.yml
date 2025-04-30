@@ -52,3 +52,5 @@ app:
       enabled: ${DOCKINS_MAIL_ENABLED:true}
       confirm:
         enabled: ${DOCKINS_MAIL_CONFIRMATION_ENABLED:true}
+  security:
+    allowed-origins: ${DOCKINS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
