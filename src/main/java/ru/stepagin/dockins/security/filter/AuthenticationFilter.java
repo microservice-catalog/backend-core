@@ -2,7 +2,6 @@ package ru.stepagin.dockins.security.filter;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -17,10 +16,10 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ru.stepagin.dockins.core.auth.AccountPrincipal;
-import ru.stepagin.dockins.core.auth.exception.TokenExpiredException;
 import ru.stepagin.dockins.core.auth.exception.TokenInvalidException;
 import ru.stepagin.dockins.core.auth.repository.AccountRepository;
 import ru.stepagin.dockins.core.user.entity.AccountEntity;
+import ru.stepagin.dockins.security.service.JwtService;
 import ru.stepagin.dockins.security.util.TokenGenerator;
 
 import java.io.IOException;
@@ -34,6 +33,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
     private final TokenGenerator tokenGenerator;
     private final AccountRepository accountRepository;
+    private final JwtService jwtService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -60,10 +60,16 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-            } catch (io.jsonwebtoken.ExpiredJwtException e) {
-                throw new TokenExpiredException("Access токен истёк");
-            } catch (JwtException e) {
-                throw new TokenInvalidException("Access токен недействителен " + e.getMessage());
+//            } catch (io.jsonwebtoken.ExpiredJwtException e) {
+//                throw new TokenExpiredException("Access токен истёк");
+//            } catch (JwtException e) {
+//                throw new TokenInvalidException("Access токен недействителен " + e.getMessage());
+            } catch (Exception e) {
+                try {
+                    jwtService.refreshTokens(response);
+                } catch (Exception ex) {
+                    jwtService.clearAuthCookies(response);
+                }
             }
         }
 
