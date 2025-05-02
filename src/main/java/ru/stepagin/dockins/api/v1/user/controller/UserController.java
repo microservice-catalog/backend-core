@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.stepagin.dockins.api.v1.project.dto.PublicProjectShortResponseDto;
+import ru.stepagin.dockins.api.v1.user.dto.ProfileShortDataResponseDto;
 import ru.stepagin.dockins.api.v1.user.dto.UserPublicProfileResponseDto;
 import ru.stepagin.dockins.api.v1.user.service.UserDomainFavouriteServicePort;
 import ru.stepagin.dockins.api.v1.user.service.UserDomainUserServicePort;
@@ -20,6 +21,13 @@ public class UserController {
 
     private final UserDomainUserServicePort userService;
     private final UserDomainFavouriteServicePort favouriteService;
+
+    @GetMapping("/me")
+    public ResponseEntity<ProfileShortDataResponseDto> getPublicProfile(
+    ) {
+        return ResponseEntity.ok(userService.getCurrentUserData());
+    }
+
 
     @GetMapping("/{username}")
     public ResponseEntity<UserPublicProfileResponseDto> getPublicProfile(
