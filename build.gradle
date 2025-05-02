@@ -40,7 +40,10 @@ dependencies {
     //    data
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     runtimeOnly 'org.postgresql:postgresql'
-    // caching
+    //    data migrations
+    implementation 'org.flywaydb:flyway-core:11.8.0'
+    runtimeOnly 'org.flywaydb:flyway-database-postgresql:11.8.0'
+    //    data caching
     implementation 'org.springframework:spring-context-support:6.0.13'
     implementation 'org.springframework.boot:spring-boot-starter-cache:3.4.5'
     //    mail
