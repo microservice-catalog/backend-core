@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.stepagin.dockins.api.v1.auth.dto.LoginRequestDto;
 import ru.stepagin.dockins.api.v1.auth.dto.RegisterRequestDto;
@@ -43,6 +44,12 @@ public class JwtService {
                 .emailConfirmed(false)
                 .build();
         return accountRepository.save(account);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteAccount(AccountEntity account) {
+        // Удаление произойдёт сразу после выхода из функции за счёт Propagation.REQUIRES_NEW
+        accountRepository.delete(account);
     }
 
     public void login(LoginRequestDto loginRequestDto, HttpServletResponse response) {

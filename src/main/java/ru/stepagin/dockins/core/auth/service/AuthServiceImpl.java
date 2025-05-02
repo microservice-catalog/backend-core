@@ -44,14 +44,14 @@ public class AuthServiceImpl implements AuthDomainAuthServicePort {
         // проверка правильности входных данных
         validateRegistrationData(requestDto);
         // находим пользователя с таким же username
-        var existingAccountWithThisUsername = accountRepository.findByUsernameIgnoreCase(requestDto.getUsername())
+        var existingAccountWithThisUsername = accountRepository.findByUsernameForRegistration(requestDto.getUsername())
                 .orElse(null);
         if (existingAccountWithThisUsername != null) {
             // если пользователь с таким username уже подтвердил почту, то выбросить ошибку
             if (existingAccountWithThisUsername.getEmailConfirmed())
                 throw new UsernameAlreadyExistsException();
             // иначе освобождаем username - удаляем аккаунт
-            accountRepository.delete(existingAccountWithThisUsername);
+            jwtService.deleteAccount(existingAccountWithThisUsername);
         }
 
         // проверяем существование подтверждённой почты в системе
@@ -70,7 +70,7 @@ public class AuthServiceImpl implements AuthDomainAuthServicePort {
                 return;
             }
             // email и username не совпадают -> удаляем старые аккаунты
-            accountRepository.delete(existingAccountWithThisEmail);
+            jwtService.deleteAccount(existingAccountWithThisEmail);
         }
 
         // username не занят, почта не занята, создаём аккаунт
@@ -159,7 +159,7 @@ public class AuthServiceImpl implements AuthDomainAuthServicePort {
      */
     public AccountEntity getCurrentUser() {
         String username = getCurrentUsername();
-        return accountRepository.findByUsernameExactlyForRegistration(username)
+        return accountRepository.findByUsernameExactly(username)
                 .orElseThrow(() -> new IllegalStateException("Текущий пользователь не найден"));
     }
 

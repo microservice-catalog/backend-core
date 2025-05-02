@@ -14,9 +14,11 @@ import java.util.UUID;
 @Repository
 public interface AccountRepository extends JpaRepository<AccountEntity, UUID> {
 
-    // только для регистрации
     @Query("select a from AccountEntity a where a.username = :username and a.deleted = false")
-    Optional<AccountEntity> findByUsernameExactlyForRegistration(@Param("username") String username);
+    Optional<AccountEntity> findByUsernameExactly(@Param("username") String username);
+
+    @Query("select a from AccountEntity a where upper(a.username) = upper(:username)")
+    Optional<AccountEntity> findByUsernameForRegistration(@Param("username") String username);
 
     // только для регистрации
     @Query("select a from AccountEntity a where upper(a.email) = upper(:email)")
