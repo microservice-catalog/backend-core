@@ -21,26 +21,26 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: spring-boot-app
+    container_name: dockins-backend
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SERVER_PORT: 8080
       DOCKINS_DB_URL: jdbc:postgresql://dockins-db:5432/postgres
-      DOCKINS_DB_USERNAME: ${DOCKINS_DB_USERNAME}
-      DOCKINS_DB_PASSWORD: ${DOCKINS_DB_PASSWORD}
-      DOCKINS_MAIL_HOST: ${DOCKINS_MAIL_HOST}
-      DOCKINS_MAIL_PORT: ${DOCKINS_MAIL_PORT}
-      DOCKINS_MAIL_USERNAME: ${DOCKINS_MAIL_USERNAME}
-      DOCKINS_MAIL_PASSWORD: ${DOCKINS_MAIL_PASSWORD}
       DOCKINS_MAIL_ENABLED: true
       DOCKINS_MAIL_CONFIRMATION_ENABLED: false
-      DOCKINS_ALLOWED_ORIGINS: ${DOCKINS_ALLOWED_ORIGINS}
+    env_file:
+      - .env
     ports:
       - "8080:8080"
     depends_on:
       - dockins-db
     networks:
       - dockins-network
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
 
 networks:
   dockins-network:
