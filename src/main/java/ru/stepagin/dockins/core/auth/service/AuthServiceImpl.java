@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -164,6 +165,20 @@ public class AuthServiceImpl implements AuthDomainAuthServicePort {
     }
 
     /**
+     * Получаем текущего авторизованного пользователя.
+     *
+     * @return AccountEntity - текущий пользователь
+     */
+    @Nullable
+    public AccountEntity getCurrentUserOrNull() {
+        String username = getCurrentUsernameOrNull();
+        if (username == null) {
+            return null;
+        }
+        return accountRepository.findByUsernameExactly(username).orElse(null);
+    }
+
+    /**
      * Получаем имя текущего пользователя из SecurityContext.
      *
      * @return имя пользователя
@@ -171,6 +186,21 @@ public class AuthServiceImpl implements AuthDomainAuthServicePort {
     private String getCurrentUsername() {
         AccountPrincipal userDetails = (AccountPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userDetails.getUsername();
+    }
+
+    /**
+     * Получаем имя текущего пользователя из SecurityContext.
+     *
+     * @return имя пользователя
+     */
+    @Nullable
+    private String getCurrentUsernameOrNull() {
+        try {
+            AccountPrincipal userDetails = (AccountPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return userDetails.getUsername();
+        } catch (Exception ignored) {
+        }
+        return null;
     }
 
     /**

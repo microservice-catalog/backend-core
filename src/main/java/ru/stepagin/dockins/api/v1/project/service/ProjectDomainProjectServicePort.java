@@ -28,4 +28,5 @@ public interface ProjectDomainProjectServicePort {
     @Transactional
     void deleteProject(String username, String projectName);
 
+    void incrementPull(String username, String projectName);
 }

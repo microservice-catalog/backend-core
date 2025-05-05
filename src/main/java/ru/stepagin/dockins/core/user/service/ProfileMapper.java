@@ -31,7 +31,7 @@ public class ProfileMapper {
         var currentUser = authServiceImpl.getCurrentUser();
         List<UUID> publicProjectsIds = projects.map(ProjectInfoEntity::getId).toList();
         long favouritesCount = projectUserFavouriteRepository.countByAccountId(user.getId());
-        long viewsCount = projectUserWatchRepository.countByAccountId(user.getId());
+        long viewsCount = projectUserWatchRepository.countByProjectIdList(publicProjectsIds);
         long likesCount = projectUserFavouriteRepository.countByProjectIdIn(publicProjectsIds);
 
         return UserPublicProfileResponseDto.builder()
@@ -53,7 +53,7 @@ public class ProfileMapper {
     ) {
         List<UUID> publicProjectsIds = publicProjectsPage.map(ProjectInfoEntity::getId).toList();
         long favouritesCount = projectUserFavouriteRepository.countByAccountId(user.getId());
-        long viewsCount = projectUserWatchRepository.countByAccountId(user.getId());
+        long viewsCount = projectUserWatchRepository.countByProjectIdList(publicProjectsIds);
         long likesCount = projectUserFavouriteRepository.countByProjectIdIn(publicProjectsIds);
 
         return ProfileResponseDto.builder()

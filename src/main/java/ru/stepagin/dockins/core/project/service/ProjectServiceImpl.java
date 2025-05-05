@@ -48,6 +48,7 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
     private final ProjectVersionRepository projectVersionRepository;
     private final ProjectMapper projectMapper;
     private final AccountRepository accountRepository;
+    private final ProjectStatsService projectStatsService;
 
     @Override
     @Transactional
@@ -115,6 +116,8 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
 
         if (entity.isPrivate())
             authService.belongToCurrentUserOrThrow(entity);
+        else
+            projectStatsService.recordWatch(entity);
 
         if (entity.getDefaultProjectVersion().isPrivate()) {
             log.warn("Аномалия: дефолтная версия проекта приватная.");
@@ -165,6 +168,13 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
         entity.markAsDeleted();
 
         projectRepository.save(entity);
+    }
+
+    @Override
+    public void incrementPull(String username, String projectName) {
+        ProjectInfoEntity entity = projectRepository.findByUsernameAndProjectName(username, projectName)
+                .orElseThrow(ProjectNotFoundException::new);
+        projectStatsService.recordPull(entity);
     }
 
 }

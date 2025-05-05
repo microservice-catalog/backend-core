@@ -72,4 +72,12 @@ public class ProjectController {
         projectService.deleteProject(username, projectName);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{username}/{projectName}/pulls")
+    public ResponseEntity<Void> incrementPull(
+            @PathVariable String username,
+            @PathVariable String projectName) {
+        projectService.incrementPull(username, projectName);
+        return ResponseEntity.status(201).build();
+    }
 }

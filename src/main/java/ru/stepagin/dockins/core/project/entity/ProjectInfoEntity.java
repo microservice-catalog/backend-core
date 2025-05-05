@@ -107,8 +107,8 @@ public class ProjectInfoEntity {
             throw new ProjectConstraintViolationException("Название проекта должно начинаться с латинской буквы.", DomainErrorCodes.PROJECT_NAME_STARTS_WITH_BAD_SYMBOL);
         if (!projectName.matches("^.*[a-zA-Z0-9]$"))
             throw new ProjectConstraintViolationException("Название проекта должно заканчиваться на латинскую букву или цифру.", DomainErrorCodes.PROJECT_NAME_ENDS_WITH_BAD_SYMBOL);
-        if (!projectName.matches("^[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9]$"))
-            throw new ProjectConstraintViolationException("Название проекта может содержать только латинские буквы, цифры и знак дефис.", DomainErrorCodes.PROJECT_NAME_CONTAINS_BAD_SYMBOL);
+        if (!projectName.matches("^[a-zA-Z][a-zA-Z0-9_-]*[a-zA-Z0-9]$"))
+            throw new ProjectConstraintViolationException("Название проекта может содержать только латинские буквы, цифры, нижнее подчёркивание и знак дефис.", DomainErrorCodes.PROJECT_NAME_CONTAINS_BAD_SYMBOL);
 
     }
 }

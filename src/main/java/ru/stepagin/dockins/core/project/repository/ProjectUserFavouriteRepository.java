@@ -18,6 +18,7 @@ public interface ProjectUserFavouriteRepository extends JpaRepository<ProjectUse
     @Query("""
             select count(p) from ProjectUserFavouriteEntity p
             where p.project.id = :id
+            and p.user <> p.project.authorAccount
             and p.deleted = false""")
 //    @Cacheable(value = "projectStatsCache", key = "#projectId + '_favouritesCount'", unless = "#result == null")
     long countByProjectId(@Param("id") UUID id);
@@ -25,6 +26,7 @@ public interface ProjectUserFavouriteRepository extends JpaRepository<ProjectUse
     @Query("""
             select count(p) from ProjectUserFavouriteEntity p
             where p.user.id = :id
+            and p.user <> p.project.authorAccount
             and p.project.isPrivate = false
             and p.deleted = false
             """)
@@ -33,6 +35,7 @@ public interface ProjectUserFavouriteRepository extends JpaRepository<ProjectUse
     @Query("""
             select count(p) from ProjectUserFavouriteEntity p
             where p.project.id in :ids
+            and p.user <> p.project.authorAccount
             and p.project.isPrivate = false
             and p.deleted = false""")
 //    @Cacheable(value = "projectUserStatsCache", key = "#userId + '_likesCount'", unless = "#result == null")
