@@ -8,6 +8,4 @@ public interface UserDomainFavouriteServicePort {
 
     List<PublicProjectShortResponseDto> getUserFavourites(String username);
 
-    List<PublicProjectShortResponseDto> getCurrentUserFavourites();
-
 }

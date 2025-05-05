@@ -100,7 +100,6 @@ public class FavouriteServiceImpl implements UserDomainFavouriteServicePort, Pro
                 .collect(Collectors.toList());
     }
 
-    @Override
     public List<PublicProjectShortResponseDto> getCurrentUserFavourites() {
         AccountEntity user = authService.getCurrentUser();
 

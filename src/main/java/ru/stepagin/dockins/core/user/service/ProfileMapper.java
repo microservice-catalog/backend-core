@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import ru.stepagin.dockins.api.v1.user.dto.ProfileResponseDto;
 import ru.stepagin.dockins.api.v1.user.dto.UserPublicProfileResponseDto;
 import ru.stepagin.dockins.core.auth.service.AuthServiceImpl;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
@@ -39,14 +38,17 @@ public class ProfileMapper {
                 .fullName(user.getFullName())
                 .description(user.getDescription())
                 .avatarUrl(user.getAvatarUrl())
-                .publicProjects(projects.stream().map(p -> projectMapper.mapToShortDto(p, currentUser)).collect(Collectors.toList()))
+                .publicProjects(projects.stream()
+                        .map(p -> projectMapper.mapToShortDto(p, currentUser))
+                        .collect(Collectors.toList()))
+                .privateProjects(null)
                 .favouritesCount(favouritesCount)
                 .viewsCount(viewsCount)
                 .likesCount(likesCount)
                 .build();
     }
 
-    public ProfileResponseDto mapToDto(
+    public UserPublicProfileResponseDto mapToDto(
             AccountEntity user,
             Page<ProjectInfoEntity> publicProjectsPage,
             Page<ProjectInfoEntity> privateProjectsPage
@@ -56,7 +58,7 @@ public class ProfileMapper {
         long viewsCount = projectUserWatchRepository.countByProjectIdList(publicProjectsIds);
         long likesCount = projectUserFavouriteRepository.countByProjectIdIn(publicProjectsIds);
 
-        return ProfileResponseDto.builder()
+        return UserPublicProfileResponseDto.builder()
                 .username(user.getUsername())
                 .fullName(user.getFullName())
                 .description(user.getDescription())

@@ -8,6 +8,8 @@ public interface UserDomainUserServicePort {
 
     UserPublicProfileResponseDto getPublicProfile(String username, PageRequest pageRequest);
 
+    ProfileShortDataResponseDto getShortUserData(String username);
+
     ProfileShortDataResponseDto getCurrentUserData();
 
 }
