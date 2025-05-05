@@ -22,7 +22,8 @@ import ru.stepagin.dockins.core.project.entity.ProjectVersionEntity;
 import ru.stepagin.dockins.core.project.entity.TagEntity;
 import ru.stepagin.dockins.core.project.exception.ProjectAlreadyExistsException;
 import ru.stepagin.dockins.core.project.exception.ProjectNotFoundException;
-import ru.stepagin.dockins.core.project.repository.*;
+import ru.stepagin.dockins.core.project.repository.ProjectInfoRepository;
+import ru.stepagin.dockins.core.project.repository.ProjectVersionRepository;
 import ru.stepagin.dockins.core.project.service.helper.DockerCommandService;
 import ru.stepagin.dockins.core.project.service.helper.MarkdownDescriptionService;
 import ru.stepagin.dockins.core.project.service.helper.TagService;
@@ -37,9 +38,6 @@ import java.util.List;
 public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
 
     private final ProjectInfoRepository projectRepository;
-    private final ProjectUserFavouriteRepository projectUserFavouriteRepository;
-    private final ProjectUserPullRepository projectUserPullRepository;
-    private final ProjectUserWatchRepository projectUserWatchRepository;
     private final DockerCommandService dockerCommandService;
     private final MarkdownDescriptionService markdownDescriptionService;
     private final AuthServiceImpl authService;
