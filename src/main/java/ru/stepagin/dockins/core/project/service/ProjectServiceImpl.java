@@ -1,11 +1,11 @@
 package ru.stepagin.dockins.core.project.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -85,10 +85,15 @@ public class ProjectServiceImpl implements ProjectDomainProjectServicePort {
     }
 
     @Override
-    public PageResponse<PublicProjectShortResponseDto> getProjects(String username, PageRequest pageRequest) {
+    public PageResponse<PublicProjectShortResponseDto> getProjects(String username, boolean privateFlag, PageRequest pageRequest) {
         if (!accountRepository.existsByUsername(username))
-            throw new UsernameNotFoundException("Не существует пользователя '" + username + "'.");
-        Page<ProjectInfoEntity> page = projectRepository.findByAuthorAccountAndPrivateFalse(username, pageRequest);
+            throw new EntityNotFoundException("Не существует пользователя '" + username + "'.");
+        Page<ProjectInfoEntity> page;
+        if (!privateFlag)
+            page = projectRepository.findByAuthorAccountAndPrivateFalse(username, pageRequest);
+        else
+            page = projectRepository.findByAuthorAccountAndPrivateTrue(username, pageRequest);
+
         return PageResponse.of(page.map(p -> projectMapper.mapToShortDto(p, authService.getCurrentUser())));
     }
 

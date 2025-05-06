@@ -30,16 +30,21 @@ public class UserServiceImpl implements UserDomainUserServicePort, UserDomainPro
     private final ProfileMapper profileMapper;
     private final AuthServiceImpl authServiceImpl;
     private final AuthServiceImpl authService;
-    private final ProjectInfoRepository projectInfoRepository;
 
     @Override
     public UserPublicProfileResponseDto getPublicProfile(String username, PageRequest pageRequest) {
         AccountEntity user = accountRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден."));
 
-        Page<ProjectInfoEntity> projects = projectRepository.findByAuthorAccountAndPrivateFalse(user, pageRequest);
+        Page<ProjectInfoEntity> publicProjects = projectRepository.findByAuthorAccountAndPrivateFalse(user.getUsername(), pageRequest);
 
-        return profileMapper.mapToDto(user, projects);
+        String currentUsername = authService.getCurrentUsernameOrNull();
+        if (currentUsername != null && currentUsername.equalsIgnoreCase(user.getUsername())) {
+            Page<ProjectInfoEntity> privateProjects = projectRepository.findByAuthorAccountAndPrivateTrue(user.getUsername(), pageRequest);
+            return profileMapper.mapToDto(user, publicProjects, privateProjects);
+        }
+
+        return profileMapper.mapToDto(user, publicProjects);
     }
 
     @Override

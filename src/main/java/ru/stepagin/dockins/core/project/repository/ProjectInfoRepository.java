@@ -54,11 +54,11 @@ public interface ProjectInfoRepository extends JpaRepository<ProjectInfoEntity, 
 
     @Query("""
             select p from ProjectInfoEntity p
-            where p.authorAccount = :authorAccount
+            where p.authorAccount.username = :username
             and p.isPrivate = true
             and p.deleted = false""")
     Page<ProjectInfoEntity> findByAuthorAccountAndPrivateTrue(
-            @Param("authorAccount") AccountEntity authorAccount,
+            @Param("username") String username,
             Pageable pageRequest
     );
 

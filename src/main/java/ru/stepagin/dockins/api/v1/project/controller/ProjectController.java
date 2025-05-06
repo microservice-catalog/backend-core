@@ -42,9 +42,14 @@ public class ProjectController {
     @GetMapping("/{username}")
     public ResponseEntity<PageResponse<PublicProjectShortResponseDto>> getUserProjects(
             @PathVariable String username,
+            @RequestParam(value = "private", required = false, defaultValue = "false") boolean privateFlag,
             @RequestParam(value = "page", required = false, defaultValue = "0") int page,
             @RequestParam(value = "limit", required = false, defaultValue = "20") int limit) {
-        PageResponse<PublicProjectShortResponseDto> projects = projectService.getProjects(username, PageRequest.of(page, limit));
+        PageResponse<PublicProjectShortResponseDto> projects = projectService.getProjects(
+                username,
+                privateFlag,
+                PageRequest.of(page, limit)
+        );
         return ResponseEntity.ok(projects);
     }
 

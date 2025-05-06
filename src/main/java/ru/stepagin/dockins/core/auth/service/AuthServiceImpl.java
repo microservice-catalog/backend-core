@@ -183,7 +183,7 @@ public class AuthServiceImpl implements AuthDomainAuthServicePort {
      *
      * @return имя пользователя
      */
-    private String getCurrentUsername() {
+    public String getCurrentUsername() {
         AccountPrincipal userDetails = (AccountPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userDetails.getUsername();
     }
@@ -194,7 +194,7 @@ public class AuthServiceImpl implements AuthDomainAuthServicePort {
      * @return имя пользователя
      */
     @Nullable
-    private String getCurrentUsernameOrNull() {
+    public String getCurrentUsernameOrNull() {
         try {
             AccountPrincipal userDetails = (AccountPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return userDetails.getUsername();

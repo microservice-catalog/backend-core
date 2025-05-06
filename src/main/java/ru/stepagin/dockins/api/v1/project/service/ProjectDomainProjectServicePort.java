@@ -16,7 +16,7 @@ public interface ProjectDomainProjectServicePort {
     @Transactional
     ProjectFullResponseDto createProject(@Valid ProjectCreateRequestDto requestDto);
 
-    PageResponse<PublicProjectShortResponseDto> getProjects(String username, PageRequest pageRequest);
+    PageResponse<PublicProjectShortResponseDto> getProjects(String username, boolean privateFlag, PageRequest pageRequest);
 
     PageResponse<PublicProjectShortResponseDto> searchProjects(String query, List<String> tags, PageRequest pageRequest);
 

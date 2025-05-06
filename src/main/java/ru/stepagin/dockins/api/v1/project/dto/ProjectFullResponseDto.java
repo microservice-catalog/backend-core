@@ -39,4 +39,6 @@ public class ProjectFullResponseDto {
 
     private boolean likedByMe;
 
+    private boolean isPrivate;
+
 }

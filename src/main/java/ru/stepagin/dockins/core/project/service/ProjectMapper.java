@@ -46,6 +46,7 @@ public class ProjectMapper {
                 .downloadsCount(downloadsCount)
                 .viewsCount(viewsCount)
                 .tags(project.getTagsAsString())
+                .isPrivate(project.isPrivate())
                 .build();
     }
 
@@ -87,6 +88,7 @@ public class ProjectMapper {
                 .downloadsCount(downloadsCount)
                 .viewsCount(viewsCount)
                 .createdOn(project.getCreatedOn() != null ? project.getCreatedOn().toString() : null)
+                .isPrivate(project.isPrivate())
                 .build();
     }
 }

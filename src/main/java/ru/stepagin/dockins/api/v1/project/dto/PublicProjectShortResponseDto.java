@@ -27,4 +27,6 @@ public class PublicProjectShortResponseDto {
 
     private boolean likedByMe;
 
+    private boolean isPrivate;
+
 }
