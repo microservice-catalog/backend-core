@@ -9,20 +9,20 @@ import ru.stepagin.dockins.api.v1.project.service.ProjectDomainTagServicePort;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/v1/projects")
 @RequiredArgsConstructor
 public class ProjectTagController {
 
     private final ProjectDomainTagServicePort tagService;
 
-    @GetMapping
+    @GetMapping("/tags")
     public ResponseEntity<TagsDto> showRecentTags(
             @RequestParam(name = "q", required = false) String query
     ) {
         return ResponseEntity.ok(tagService.searchTags(query));
     }
 
-    @GetMapping("/projects/{username}/{projectName}/tags")
+    @GetMapping("/{username}/{projectName}/tags")
     public ResponseEntity<TagsDto> getTags(
             @PathVariable String username,
             @PathVariable String projectName
@@ -30,7 +30,7 @@ public class ProjectTagController {
         return ResponseEntity.ok(tagService.getTags(username, projectName));
     }
 
-    @PutMapping("/projects/{username}/{projectName}/tags")
+    @PutMapping("/{username}/{projectName}/tags")
     public ResponseEntity<TagsDto> updateTag(
             @PathVariable String username,
             @PathVariable String projectName,
