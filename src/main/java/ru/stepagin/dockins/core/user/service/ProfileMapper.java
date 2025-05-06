@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 import ru.stepagin.dockins.api.v1.user.dto.UserPublicProfileResponseDto;
 import ru.stepagin.dockins.core.auth.service.AuthServiceImpl;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
+import ru.stepagin.dockins.core.project.mapper.ProjectMapper;
 import ru.stepagin.dockins.core.project.repository.ProjectUserFavouriteRepository;
 import ru.stepagin.dockins.core.project.repository.ProjectUserWatchRepository;
-import ru.stepagin.dockins.core.project.service.ProjectMapper;
 import ru.stepagin.dockins.core.user.entity.AccountEntity;
 
 import java.util.List;

@@ -25,8 +25,11 @@ import ru.stepagin.dockins.core.external.dadata.DadataValidationService;
 import ru.stepagin.dockins.core.external.mail.EmailConfirmationService;
 import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
 import ru.stepagin.dockins.core.project.entity.ProjectVersionEntity;
+import ru.stepagin.dockins.core.storage.entity.ImageEntity;
 import ru.stepagin.dockins.core.user.entity.AccountEntity;
 import ru.stepagin.dockins.security.service.JwtService;
+
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -241,5 +244,12 @@ public class AuthServiceImpl implements AuthDomainAuthServicePort {
 
     public void belongToCurrentUserOrThrow(ProjectVersionEntity version) {
         belongToCurrentUserOrThrow(version.getProject());
+    }
+
+    public void belongToCurrentUserOrThrow(ImageEntity image) {
+        AccountEntity currentUser = this.getCurrentUser();
+        if (!Objects.equals(currentUser.getId(), image.getAccount().getId())) {
+            throw new ActionNotAllowedException();
+        }
     }
 }

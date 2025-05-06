@@ -1,4 +1,4 @@
-package ru.stepagin.dockins.core.project.service;
+package ru.stepagin.dockins.core.project.mapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

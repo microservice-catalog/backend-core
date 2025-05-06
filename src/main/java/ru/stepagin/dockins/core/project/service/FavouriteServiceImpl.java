@@ -14,6 +14,7 @@ import ru.stepagin.dockins.core.project.entity.ProjectInfoEntity;
 import ru.stepagin.dockins.core.project.entity.ProjectUserFavouriteEntity;
 import ru.stepagin.dockins.core.project.enumeration.FavouriteStatus;
 import ru.stepagin.dockins.core.project.exception.ProjectNotFoundException;
+import ru.stepagin.dockins.core.project.mapper.ProjectMapper;
 import ru.stepagin.dockins.core.project.repository.ProjectInfoRepository;
 import ru.stepagin.dockins.core.project.repository.ProjectUserFavouriteRepository;
 import ru.stepagin.dockins.core.user.entity.AccountEntity;

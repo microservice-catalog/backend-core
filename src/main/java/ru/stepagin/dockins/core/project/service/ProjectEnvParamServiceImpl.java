@@ -15,6 +15,7 @@ import ru.stepagin.dockins.core.project.entity.ProjectVersionEntity;
 import ru.stepagin.dockins.core.project.exception.EnvParamAlreadyExistsException;
 import ru.stepagin.dockins.core.project.exception.EnvParamNotFoundException;
 import ru.stepagin.dockins.core.project.exception.VersionNotFoundException;
+import ru.stepagin.dockins.core.project.mapper.EnvMapper;
 import ru.stepagin.dockins.core.project.repository.ProjectEnvParamRepository;
 import ru.stepagin.dockins.core.project.repository.ProjectVersionRepository;
 

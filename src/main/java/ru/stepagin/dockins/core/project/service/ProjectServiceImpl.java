@@ -22,6 +22,7 @@ import ru.stepagin.dockins.core.project.entity.ProjectVersionEntity;
 import ru.stepagin.dockins.core.project.entity.TagEntity;
 import ru.stepagin.dockins.core.project.exception.ProjectAlreadyExistsException;
 import ru.stepagin.dockins.core.project.exception.ProjectNotFoundException;
+import ru.stepagin.dockins.core.project.mapper.ProjectMapper;
 import ru.stepagin.dockins.core.project.repository.ProjectInfoRepository;
 import ru.stepagin.dockins.core.project.repository.ProjectVersionRepository;
 import ru.stepagin.dockins.core.project.service.helper.DockerCommandService;

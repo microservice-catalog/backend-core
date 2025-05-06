@@ -36,7 +36,6 @@ public class DomainErrorCodes {
     public static final int RESOURCE_NOT_FOUND = 4302; // Ресурс не найден
     public static final int ACCOUNT_LOCKED = 4303; // Аккаунт заблокирован
 
-
     // Ошибки проектов
     public static final int PROJECT_NOT_FOUND = 5100; // Проект не найден
     public static final int PROJECT_ALREADY_EXISTS = 5101; // Проект уже существует
@@ -62,5 +61,10 @@ public class DomainErrorCodes {
     // Внутренние ошибки проектов
     public static final int INTERNAL_PROJECT_ERROR = 5500; // Внутренняя ошибка проекта
 
+    // Ошибки файлов
+    public static final int BAD_FILE = 6000;
+    public static final int FILE_NOT_FOUND = 6001;
+    public static final int BAD_CONTENT_TYPE = 6002;
+    public static final int TOO_BID_FILE_SIZE = 6003;
 
 }
