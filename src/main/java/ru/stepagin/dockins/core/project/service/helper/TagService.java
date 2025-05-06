@@ -1,6 +1,7 @@
 package ru.stepagin.dockins.core.project.service.helper;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.stepagin.dockins.core.project.entity.TagEntity;
@@ -50,5 +51,12 @@ public class TagService {
 
     private String normalizeTag(String raw) {
         return raw.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9-]", "");
+    }
+
+    public List<TagEntity> searchTags(String query, Pageable pageRequest) {
+        if (query == null || query.isBlank()) {
+            return tagRepository.findRelevant(pageRequest);
+        }
+        return tagRepository.findAllLike(query, pageRequest);
     }
 }
