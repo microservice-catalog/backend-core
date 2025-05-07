@@ -10,11 +10,17 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.stepagin.dockins.api.common.CustomErrorResponse;
 import ru.stepagin.dockins.core.user.exception.UserDomainException;
+import ru.stepagin.dockins.core.user.exception.UserNotFoundException;
 
 @Slf4j
 @RestControllerAdvice
 @Order(1)
 public class UserExceptionHandler {
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<CustomErrorResponse> handleSendEmailException(UserNotFoundException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request, ex);
+    }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<CustomErrorResponse> handleSendEmailException(EntityNotFoundException ex, HttpServletRequest request) {

@@ -10,6 +10,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import ru.stepagin.dockins.core.DomainErrorCodes;
 import ru.stepagin.dockins.core.common.exception.BadUpdateDataException;
 import ru.stepagin.dockins.core.common.exception.DomainEntityNotFoundException;
@@ -102,6 +103,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<CustomErrorResponse> handleAll(Exception ex, HttpServletRequest request) {
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Внутренняя ошибка сервера", request, ex);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<CustomErrorResponse> handleRuntime(NoResourceFoundException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.NOT_FOUND, "Ошибка выполнения", request, ex);
     }
 
     @ExceptionHandler(RuntimeException.class)
