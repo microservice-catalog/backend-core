@@ -112,14 +112,17 @@ public class ImageService implements UserPhotoDomainImageService, UserPhotoDomai
         var lastPhoto = imageRepository.findLastUserPhoto(username);
         if (lastPhoto.isPresent()) {
             user.setAvatarUrl(getImageUrl(lastPhoto.get().getId().toString()));
-            accountRepository.save(user);
+        } else {
+            user.setAvatarUrl(null);
         }
+        accountRepository.save(user);
 
         imageRepository.save(photo);
     }
 
 
     public String getImageUrl(String photoId) {
-        return "/photos/" + photoId;
+//        return "/photos/" + photoId;
+        return photoId;
     }
 }
